@@ -1,0 +1,6 @@
+#pragma once
+
+#include "libcpp64/system.h"
+#include "libcpp64/audio.h"
+#include "libcpp64/video.h"
+#include "libcpp64/keyboard.h"

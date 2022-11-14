@@ -1,0 +1,88 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Python) generate sprites",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/bitmap2cpp.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-m",
+                "-o", "./resources/out.cpp",
+                "./resources/bitmaps/amiga_ball0.png",
+                "./resources/bitmaps/amiga_ball1.png",
+                "./resources/bitmaps/amiga_ball2.png",
+                "./resources/bitmaps/amiga_ball3.png",
+                "./resources/bitmaps/amiga_ball4.png",
+                "./resources/bitmaps/amiga_ball5.png"
+            ]
+        },
+        {
+            "name": "(Python) disk64",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/disk64.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--export",
+                "build/amiga_ball.d64",
+                "AMIGA-BALL"
+            ]
+        },
+        {
+            "name": "(Python) dis64",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/dis64.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "build/amiga_ball.prg","build/out.s"
+            ]
+        },
+        {
+            "name": "(Python) sidc",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/sidc.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "resources/Cauldron.sid",
+                "resources/music.cpp"
+            ]
+        },
+        {
+            "name": "(Python) bin2cpp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/bin2cpp.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "resources/Cauldron.sid",
+                "resources/Cauldron.cpp",
+                "126" // skip 124 bytes SID header + 2 bytes load address
+            ]
+        },
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/cppdemo.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "Build"
+        }
+    ]
+}

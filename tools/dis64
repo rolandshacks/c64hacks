@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#
+# dis64 - Disassembler for MOS 6502/6510
+# (C) Roland Schabenberger
+#
+
+BACKUP_WD=$PWD
+SCRIPT_DIR=$(dirname $(readlink -f $0))
+python3 $SCRIPT_DIR/dis64.py "$@"

@@ -1,0 +1,120 @@
+#pragma once
+
+#include <memory>
+#include <algorithm>
+#include <initializer_list>
+
+namespace std64 {
+
+template <class T, std::size_t N>
+class array_base {
+    public:
+        typedef std::size_t                 size_type;
+        typedef std::ptrdiff_t              difference_type;
+        typedef T                           value_type;
+        typedef T*                          pointer;
+        typedef const T*                    const_pointer;
+        typedef value_type&                 reference;
+        typedef const value_type&           const_reference;
+        typedef value_type*                 iterator;
+        typedef const iterator              const_iterator;
+
+    public:
+        size_type size() { return N; }
+
+
+};
+
+template <class T, std::size_t N, uint16_t addr=0x0, bool = (addr==0x0)>
+class array : public array_base<T, N> {
+
+    public:
+        array() = default;
+        array(const array&) = default;
+        array(std::initializer_list<T> lst) {
+            size_t j=0;
+            for (const auto* i=lst.begin(); i != lst.end(); ++i) {
+                at(j++) = *i;
+                if (j==N) break; // no overrun
+            }
+        }
+
+    public:
+        constexpr typename array_base<T, N>::pointer data() noexcept { return reinterpret_cast<typename array_base<T, N>::pointer>(addr); };
+        constexpr typename array_base<T, N>::const_pointer data() const noexcept { return reinterpret_cast<typename array_base<T, N>::pointer>(addr); };
+
+    public:
+        constexpr typename array_base<T, N>::reference at( typename array_base<T, N>::size_type pos ) { return *(data()+pos); }
+        constexpr typename array_base<T, N>::const_reference at( typename array_base<T, N>::size_type pos ) const noexcept { return *(data()+pos); };
+
+        constexpr typename array_base<T, N>::reference operator[]( typename array_base<T, N>::size_type pos ) { return at(pos); }
+        constexpr typename array_base<T, N>::const_reference operator[]( typename array_base<T, N>::size_type pos ) const { return at(pos); }
+
+        constexpr typename array_base<T, N>::reference front() { return at(0); }
+        constexpr typename array_base<T, N>::const_reference front() const { at(0); }
+
+        constexpr typename array_base<T, N>::reference back() { return at(N-1); }
+        constexpr typename array_base<T, N>::const_reference back() const { return at(N-1); }
+
+    public:
+        constexpr typename array_base<T, N>::iterator begin() noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+        constexpr typename array_base<T, N>::const_iterator begin() const noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+        constexpr typename array_base<T, N>::const_iterator cbegin() const noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+
+        constexpr typename array_base<T, N>::iterator end() noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); } // NOLINT(clang-diagnostic-array-bounds)
+        constexpr typename array_base<T, N>::const_iterator end() const noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); }
+        constexpr typename array_base<T, N>::const_iterator cend() const noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); }
+
+    public:
+        void fill(const typename array_base<T, N>::value_type& u) { fill_n(begin(), array_base<T, N>::size(), u); }
+
+};
+
+template <class T, std::size_t N>
+class array<T, N, 0x0, true> : public array_base<T, N> {
+    private:
+        T buffer_[N ? N : 1];
+
+    public:
+        array() = default;
+        array(const array&) = default;
+        array(std::initializer_list<T> lst) {
+            size_t j=0;
+            for (const auto* i=lst.begin(); i != lst.end(); ++i) {
+                at(j++) = *i;
+                if (j==N) break; // no overrun
+            }
+        }
+
+    public:
+        constexpr typename array_base<T, N>::pointer data() noexcept { return buffer_; };
+        constexpr typename array_base<T, N>::const_pointer data() const noexcept { return buffer_; };
+
+    public:
+        constexpr typename array_base<T, N>::reference at( typename array_base<T, N>::size_type pos ) { return *(data()+pos); }
+        constexpr typename array_base<T, N>::const_reference at( typename array_base<T, N>::size_type pos ) const noexcept { return *(data()+pos); };
+
+        constexpr typename array_base<T, N>::reference operator[]( typename array_base<T, N>::size_type pos ) { return at(pos); }
+        constexpr typename array_base<T, N>::const_reference operator[]( typename array_base<T, N>::size_type pos ) const { return at(pos); }
+
+        constexpr typename array_base<T, N>::reference front() { return at(0); }
+        constexpr typename array_base<T, N>::const_reference front() const { at(0); }
+
+        constexpr typename array_base<T, N>::reference back() { return at(N-1); }
+        constexpr typename array_base<T, N>::const_reference back() const { return at(N-1); }
+
+    public:
+        constexpr typename array_base<T, N>::iterator begin() noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+        constexpr typename array_base<T, N>::const_iterator begin() const noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+        constexpr typename array_base<T, N>::const_iterator cbegin() const noexcept { return typename array_base<T, N>::iterator(addressof(at(0))); }
+
+        constexpr typename array_base<T, N>::iterator end() noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); } // NOLINT(clang-diagnostic-array-bounds)
+        constexpr typename array_base<T, N>::const_iterator end() const noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); }
+        constexpr typename array_base<T, N>::const_iterator cend() const noexcept { return typename array_base<T, N>::iterator(addressof(at(N))); }
+
+    public:
+        void fill(const typename array_base<T, N>::value_type& u) { fill_n(begin(), array_base<T, N>::size(), u); }
+
+};
+
+} // namespace

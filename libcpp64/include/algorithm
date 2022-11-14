@@ -1,0 +1,15 @@
+#pragma once
+
+
+namespace std64 {
+
+template<class OutputIt, class Size, class T>
+OutputIt fill_n(OutputIt first, Size count, const T& value)
+{
+    for (Size i = 0; i < count; i++) {
+        *first++ = value;
+    }
+    return first;
+}
+
+} // namespace

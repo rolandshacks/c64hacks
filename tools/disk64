@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#
+# disk64 - Disk tool for C64 .D64 files
+# (C) Roland Schabenberger
+#
+
+BACKUP_WD=$PWD
+SCRIPT_DIR=$(dirname $(readlink -f $0))
+python3 $SCRIPT_DIR/disk64.py "$@"
