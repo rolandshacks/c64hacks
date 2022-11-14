@@ -1,25 +1,22 @@
 # C64 C++ Demo
 
-## Infos
+C++ demo for the Commodore C64 using llvm-mos.
 
-LLVM Inline Assembler
+- Animated sprites
+- Scrolling starfield
+- SID music
+- Raster interrupt handling
+- C64 system programming SDK
+- Support tools
+- CMake build configuration
 
-https://llvm.org/docs/LangRef.html#inline-assembler-expressions
-https://llvm.org/docs/LangRef.html#inline-asm-modifiers
-
-SID player
-https://weblambdazero.blogspot.com/2022/04/embedding-data-in-executable-with-llvm.html
-
-Raster IRQ
-https://c64os.com/post/rasterinterruptsplitscreen
-
+Prerequisite: The LLVM-MOS development environment needs to be installed (https://github.com/llvm-mos/llvm-mos-sdk).
 
 ## Tools
 
 ### C64 Disassembler
 
 DIS64 is a disassembler for 6502 machine code.
-
 
 #### Usage
 
@@ -88,3 +85,10 @@ Usage: sidc SIDFILE CPPFILE
 SIDFILE : C64 SID music file
 CPPFILE : C++ output file
 ```
+
+## Additional Infos
+
+LLVM Inline Assembler
+
+https://llvm.org/docs/LangRef.html#inline-assembler-expressions
+https://llvm.org/docs/LangRef.html#inline-asm-modifiers
