@@ -10,6 +10,7 @@ set(INCLUDES
     ./include/algorithm
     ./include/sys
     ./include/libcpp64/system.h
+    ./include/libcpp64/auxiliary.h
     ./include/libcpp64/audio.h
     ./include/libcpp64/video.h
     ./include/libcpp64/keyboard.h
@@ -18,6 +19,7 @@ set(INCLUDES
 set(SOURCES
     ${INCLUDES}
     src/system.cpp
+    src/auxiliary.cpp
     src/audio.cpp
     src/video.cpp
     src/keyboard.cpp

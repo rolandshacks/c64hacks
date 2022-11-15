@@ -62,13 +62,14 @@ class Video {
         static void setSpritePos(uint8_t sprite, uint16_t x, uint16_t y) noexcept;
         static void setSpriteColor(uint8_t sprite, uint8_t color) noexcept;
         static void setSpriteCommonColors(uint8_t colorA, uint8_t colorB) noexcept;
-        static uint8_t getSpriteAddress(const uint8_t* data) noexcept;
+        static uint8_t getSpriteAddress(const uint8_t* data=nullptr) noexcept;
 
     public:
         static void enableRasterIrq() noexcept;
         static void setRasterIrqLine(uint16_t line) noexcept;
         static void addRasterSequenceStep(uint16_t line, interrupt_handler_t fn) noexcept;
         static inline volatile uint8_t getCurrentRasterSequenceStep() noexcept { return raster_sequence_step; }
+        static void enableRasterIrqDebug(bool enable) noexcept;
 
         [[nodiscard]] static inline volatile uint16_t getRasterLine() noexcept {
             return (memory(0xd011) & 0x80 >> 7) | memory(0xd012);
@@ -137,6 +138,7 @@ class Video {
         static raster_step_t raster_sequence[8];
         static uint8_t raster_sequence_step;
         static uint8_t raster_sequence_step_count;
+        static bool raster_irq_debug;
         static uint16_t vic_base;
         static uint16_t screen_base;
         static uint16_t char_base;

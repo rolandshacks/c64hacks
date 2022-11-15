@@ -6,7 +6,7 @@
 #if (__MOS_EMULATOR__)
 static uint8_t *debug_memory = nullptr;
 
-static address_t make_address(const uint16_t addr) {
+static address_t sys::make_address(const uint16_t addr) {
     if (nullptr == debug_memory) {
         debug_memory = new uint8_t[65536];
         for (auto i = 0; i < 65536; i++) debug_memory[i] = static_cast<uint8_t>(i % 256);
@@ -88,7 +88,7 @@ void System::enableKernalAndBasic() noexcept {
 void System::memMap(uint8_t bits) noexcept {
     uint8_t memFlags = memory(0x01) & 0xf8;
     memFlags |= (bits & 0x7);
-    memory(0x01) = memFlags;    
+    memory(0x01) = memFlags;
 }
 
 void System::copyCharset(uint8_t* dest, size_t src_offset, size_t count) noexcept {

@@ -17,8 +17,7 @@ uint16_t Video::screen_base = 0x400;
 uint16_t Video::char_base = 0x1000;
 uint16_t Video::bitmap_base = 0x2000;
 uint16_t Video::color_base = 0xd800;
-
-const bool EnableIrqDebug = false;
+bool Video::raster_irq_debug{false};
 
 void Video::init() noexcept {
 
@@ -174,12 +173,16 @@ void Video::addRasterSequenceStep(uint16_t line, interrupt_handler_t fn) noexcep
     }
 }
 
+void Video::enableRasterIrqDebug(bool enable) noexcept {
+    raster_irq_debug = enable;
+}
+
 __attribute__((interrupt_norecurse))
 void Video::onRasterInterrupt() noexcept {
 
     uint8_t border;
 
-    if constexpr (EnableIrqDebug) {
+    if (raster_irq_debug) {
         border = Video::getBorder();
         Video::setBorder(border+1);
     }
@@ -205,7 +208,7 @@ void Video::onRasterInterrupt() noexcept {
         entry.fn();
     }
 
-    if constexpr (EnableIrqDebug) {
+    if (raster_irq_debug) {
         Video::setBorder(border);
     }
 
@@ -342,6 +345,7 @@ void Video::setSpriteMode(uint8_t sprite, bool multicolor) noexcept {
 }
 
 uint8_t Video::getSpriteAddress(const uint8_t* data) noexcept {
+    if (nullptr == data) data = __sprite_data[0];
     uint8_t block = (uint8_t) ((reinterpret_cast<uint16_t>(data) - vic_base) / 64);
     return block;
 }
