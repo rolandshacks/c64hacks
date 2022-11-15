@@ -1,6 +1,6 @@
 # C64 C++ Demo
 
-C++ demo for the Commodore C64 using llvm-mos.
+Demo for the Commodore C64 written in C++ 17 using Clang for 6502/6510.
 
 - Animated sprites
 - Scrolling starfield
@@ -12,7 +12,7 @@ C++ demo for the Commodore C64 using llvm-mos.
 
 Prerequisite: The LLVM-MOS development environment needs to be installed (https://github.com/llvm-mos/llvm-mos-sdk).
 
-## Tools
+## Tools coming with the Demo
 
 ### C64 Disassembler
 
@@ -88,7 +88,43 @@ CPPFILE : C++ output file
 
 ## Additional Infos
 
-LLVM Inline Assembler
+### Visual Studio Code
 
-https://llvm.org/docs/LangRef.html#inline-assembler-expressions
-https://llvm.org/docs/LangRef.html#inline-asm-modifiers
+Please make sure you add the CMake "Kit" definition to the
+use-local configuration file "cmake-tools-kits.json"
+
+On Windows, it could look like this:
+
+```
+
+ {
+    "name": "Clang 16.0.0 (MOS)",
+    "compilers": {
+      "C": "SOMEFOLDER\\llvm-mos\\bin\\mos-c64-clang.bat",
+      "CXX": "SOMEFOLDER\\llvm-mos\\bin\\mos-c64-clang++.bat"
+    }
+  }
+
+```
+
+On Linux, it might look similar to this:
+
+```
+
+  {
+    "name": "Clang 16.0.0 llvm-mos",
+    "compilers": {
+      "C": "/home/roland/llvm-mos/bin/mos-c64-clang",
+      "CXX": "/home/roland/llvm-mos/bin/mos-c64-clang++"
+    }
+  }
+
+```
+
+### Links to Further Information
+
+LLVM Assembler and Inline Assembler
+
+- Have a look at the GNU assembler
+- https://llvm.org/docs/LangRefhtml#inline-assembler-expressions
+- https://llvm.org/docs/LangRef.html#inline-asm-modifiers

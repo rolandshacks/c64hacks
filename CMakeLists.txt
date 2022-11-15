@@ -10,8 +10,6 @@ if(${ENABLE_LLVM_MOS})
     set(LLVM_MOS_PLATFORM               c64)
     set(CMAKE_SYSTEM_NAME               Generic)
     set(CMAKE_SYSTEM_PROCESSOR          6510)
-    set(CMAKE_C_COMPILER                mos-c64-clang.bat)
-    set(CMAKE_CXX_COMPILER              mos-c64-clang++.bat)
     set(CMAKE_TRY_COMPILE_TARGET_TYPE   STATIC_LIBRARY)
 endif(${ENABLE_LLVM_MOS})
 
