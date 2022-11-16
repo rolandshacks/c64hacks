@@ -58,10 +58,10 @@ namespace SpriteBatch {
             auto col = sprite_colors[i];
             sprite.set(true, block_index, col, true);
 
-            sprite.x = Constants::Width / 3 + i * 300;
-            sprite.y = - i * 100;
-            sprite.vx = 25 + i;
-            sprite.vy = - i * 30;
+            sprite.x = (int16_t) (Constants::Width / 3 + i * 300);
+            sprite.y = (int16_t) (- i * 100);
+            sprite.vx = (int16_t) (25 + i);
+            sprite.vy = (int16_t) (- i * 30);
             sprite.updatePos();
             sprite.updateAnimation();
 
@@ -147,7 +147,7 @@ namespace Starfield {
         uint8_t* linePtr = (uint8_t*) Video::getColorBasePtr() + y * 40;
         while (y < 25) {
             memset(linePtr, star_color[y%3], 40);
-            linePtr += 40 * step_size;
+            linePtr += (size_t) (40 * step_size);
             y += step_size;
         }
     }

@@ -68,10 +68,10 @@ class Video {
         static void enableRasterIrq() noexcept;
         static void setRasterIrqLine(uint16_t line) noexcept;
         static void addRasterSequenceStep(uint16_t line, interrupt_handler_t fn) noexcept;
-        static inline volatile uint8_t getCurrentRasterSequenceStep() noexcept { return raster_sequence_step; }
+        static inline uint8_t getCurrentRasterSequenceStep() noexcept { return raster_sequence_step; }
         static void enableRasterIrqDebug(bool enable) noexcept;
 
-        [[nodiscard]] static inline volatile uint16_t getRasterLine() noexcept {
+        [[nodiscard]] static inline uint16_t getRasterLine() noexcept {
             return (memory(0xd011) & 0x80 >> 7) | memory(0xd012);
         }
 
@@ -136,7 +136,7 @@ class Video {
         static volatile uint16_t last_frame_counter_;
         static bool raster_irq_enabled;
         static raster_step_t raster_sequence[8];
-        static uint8_t raster_sequence_step;
+        static volatile uint8_t raster_sequence_step;
         static uint8_t raster_sequence_step_count;
         static bool raster_irq_debug;
         static uint16_t vic_base;

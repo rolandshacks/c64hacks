@@ -7,7 +7,7 @@ using namespace sys;
 
 void Audio::init() {
 
-    uint8_t sid_data_ref = __sid_data[0];
+    uint8_t sid_data_ref = __sid_data[0]; // NOLINT
 
     asm volatile(
         "LDA #$00\n\t"

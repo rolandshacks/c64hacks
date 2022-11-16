@@ -3,7 +3,7 @@
 
 #include "libcpp64/system.h"
 
-#if (__MOS_EMULATOR__)
+#if (MOS_EMULATOR)
 static uint8_t *debug_memory = nullptr;
 
 static address_t sys::make_address(const uint16_t addr) {
@@ -16,21 +16,21 @@ static address_t sys::make_address(const uint16_t addr) {
 #endif
 
 volatile uint8_t& sys::memory(const uint16_t address) {
-    #if (__MOS_CPU__)
-        return *(address_t)(address);
+    #if (MOS_CPU)
+        return *(reinterpret_cast<address_t>(address));
     #else
         return *make_address(address);
     #endif
 }
 
-volatile void sys::set_bit(const uint16_t address, uint8_t bit, bool enabled) {
-    auto ptr = (address_t)(address);
-    if (enabled) { *ptr |= (1 << bit); }
-    else { *ptr &= ~(1 << bit); }
+void sys::set_bit(const uint16_t address, uint8_t bit, bool enabled) {
+    auto ptr = reinterpret_cast<address_t>(address);
+    auto value = (enabled) ? *ptr | (1 << bit) : *ptr & ~(1 << bit);
+    *ptr = value;
 }
 
-[[nodiscard]] volatile bool sys::get_bit(const uint16_t address, uint8_t bit) {
-    auto ptr = (address_t)(address);
+[[nodiscard]] bool sys::get_bit(const uint16_t address, uint8_t bit) {
+    auto ptr = reinterpret_cast<address_t>(address);
     return (*ptr & (1 << bit)) != 0x0;
 }
 
@@ -91,6 +91,7 @@ void System::memMap(uint8_t bits) noexcept {
     memory(0x01) = memFlags;
 }
 
+// NOLINTNEXTLINE
 void System::copyCharset(uint8_t* dest, size_t src_offset, size_t count) noexcept {
     disableInterrupts();
     uint8_t oldMemFlags = memory(0x01);

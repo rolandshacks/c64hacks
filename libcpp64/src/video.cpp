@@ -10,7 +10,7 @@ volatile Video::stats_t Video::stats_{};
 volatile uint16_t Video::last_frame_counter_{0xffff};
 bool Video::raster_irq_enabled{false};
 Video::raster_step_t Video::raster_sequence[8]{};
-uint8_t Video::raster_sequence_step{0};
+volatile uint8_t Video::raster_sequence_step{0};
 uint8_t Video::raster_sequence_step_count{0};
 uint16_t Video::vic_base = 0x0;
 uint16_t Video::screen_base = 0x400;
@@ -21,7 +21,7 @@ bool Video::raster_irq_debug{false};
 
 void Video::init() noexcept {
 
-    uint8_t sprite_data_ref = __sprite_data[0][0];
+    uint8_t sprite_data_ref = __sprite_data[0][0];  // NOLINT
 
     uint8_t acc=0x0;
     asm volatile (
@@ -94,8 +94,6 @@ void Video::setGraphicsMode(GraphicsMode mode) noexcept {
     uint8_t flags1 = memory(0xd016)&0xef;
 
     switch (mode) {
-        case GraphicsMode::StandardTextMode:
-            break;
         case GraphicsMode::StandardBitmapMode:
             flags0 |= 0x20; // bitmap flag
             break;
@@ -108,8 +106,6 @@ void Video::setGraphicsMode(GraphicsMode mode) noexcept {
             break;
         case GraphicsMode::ExtendedBackgroundColorMode:
             flags0 |= 0x40; // ecm flag
-            break;
-        case GraphicsMode::IdleMode:
             break;
         default:
             break;
@@ -180,7 +176,7 @@ void Video::enableRasterIrqDebug(bool enable) noexcept {
 __attribute__((interrupt_norecurse))
 void Video::onRasterInterrupt() noexcept {
 
-    uint8_t border;
+    uint8_t border = 0;
 
     if (raster_irq_debug) {
         border = Video::getBorder();
@@ -194,7 +190,7 @@ void Video::onRasterInterrupt() noexcept {
     if (raster_sequence_step_count < 2) {
         onVerticalBlank();
     } else {
-        raster_sequence_step++;
+        raster_sequence_step = raster_sequence_step + 1;
         if (raster_sequence_step >= raster_sequence_step_count) {
             onVerticalBlank();
             raster_sequence_step = 0;
@@ -219,20 +215,20 @@ void Video::onVerticalBlank() noexcept {
     stats_.time_delta = metrics_.millis_per_frame;
 
     if (!metrics_.is_pal) {
-        stats_.time_micro_err += 667; // microseconds missing from 1000/60
+        stats_.time_micro_err = stats_.time_micro_err + 667; // microseconds missing from 1000/60
         if (stats_.time_micro_err >= 1000) {
-            stats_.time_micro_err -= 1000;
-            stats_.time_delta++;
+            stats_.time_micro_err = stats_.time_micro_err - 1000;
+            stats_.time_delta = stats_.time_delta + 1;
         }
     }
 
-    stats_.time_millis += stats_.time_delta;
+    stats_.time_millis = stats_.time_millis + stats_.time_delta;
     if (stats_.time_millis >= 1000) {
-        stats_.time_seconds++;
-        stats_.time_millis -= 1000;
+        stats_.time_seconds = stats_.time_seconds+ 1;
+        stats_.time_millis = stats_.time_millis + 1000;
     }
 
-    stats_.frame_counter++;
+    stats_.frame_counter = stats_.frame_counter + 1;
 }
 
 void Video::waitNextFrame() noexcept {

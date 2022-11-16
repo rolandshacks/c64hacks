@@ -4,11 +4,11 @@
 #include <string.h>
 
 #if defined(__C64__) || defined(__CBM__) || defined(__NES__) || defined(__MEGA65__)
-#define __MOS_CPU__ 1
-#define __MOS_EMULATOR__ 0
+#define MOS_CPU 1
+#define MOS_EMULATOR 0
 #else  // defined(_WIN32) || defined(__linux__) || defined(__APPLE__)
-#define __MOS_CPU__ 0
-#define __MOS_EMULATOR__ 1
+#define MOS_CPU 0
+#define MOS_EMULATOR 1
 #endif
 
 using address_t = volatile uint8_t*;
@@ -18,8 +18,8 @@ namespace sys {
 typedef void (*interrupt_handler_t)(void);
 
 volatile uint8_t& memory(const uint16_t address);
-volatile void set_bit(const uint16_t address, uint8_t bit, bool enabled);
-[[nodiscard]] volatile bool get_bit(const uint16_t address, uint8_t bit);
+void set_bit(const uint16_t address, uint8_t bit, bool enabled);
+[[nodiscard]] bool get_bit(const uint16_t address, uint8_t bit);
 
 
 class Constants {
