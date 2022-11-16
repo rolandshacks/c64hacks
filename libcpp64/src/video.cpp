@@ -183,8 +183,6 @@ void Video::onRasterInterrupt() noexcept {
         Video::setBorder(border+1);
     }
 
-    memory(0xd019) = 0xff; // ACK irq, clear VIC irq flag
-
     const auto& entry = raster_sequence[raster_sequence_step];
 
     if (raster_sequence_step_count < 2) {
@@ -208,6 +206,7 @@ void Video::onRasterInterrupt() noexcept {
         Video::setBorder(border);
     }
 
+    memory(0xd019) = 0xff; // ACK irq, clear VIC irq flag
 }
 
 void Video::onVerticalBlank() noexcept {
@@ -355,9 +354,10 @@ void Video::setSpriteData(uint8_t sprite, const uint8_t* data) noexcept {
 }
 
 void Video::setSpritePos(uint8_t sprite, uint16_t x, uint16_t y) noexcept {
-    memory(0xd000 + sprite*2) = x&0xff;
+    uint16_t addr = 0xd000 + sprite*2;
+    memory(addr) = x&0xff;
+    memory(addr+1) = y&0xff;
     set_bit(0xd010, sprite, (x&0xff00)!=0x0);
-    memory(0xd001 + sprite*2) = y&0xff;
 }
 
 void Video::setSpriteColor(uint8_t sprite, uint8_t color) noexcept {

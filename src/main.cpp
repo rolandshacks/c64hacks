@@ -11,7 +11,7 @@ struct Sprite {
     int16_t y{0};
     int16_t vx{0};
     int16_t vy{0};
-    uint8_t address;
+    uint8_t address{0};
     uint8_t animation{0};
 
     Sprite()
@@ -39,8 +39,8 @@ struct Sprite {
 
 namespace SpriteBatch {
 
-    Sprite sprites[8];
-    const size_t sprite_count = sizeof(sprites)/sizeof(sprites[0]);
+    const size_t sprite_count = 8;
+    Sprite sprites[sprite_count];
 
     static void init() {
 
@@ -98,15 +98,10 @@ namespace SpriteBatch {
                 sprite.animation = (sprite.animation + 48 - da) % 48;
             }
 
-        }
-
-    }
-
-    static void sync() {
-        for (const auto& sprite : sprites) {
             sprite.updatePos();
             sprite.updateAnimation();
         }
+
     }
 
 } // namespace
@@ -217,7 +212,7 @@ class Application {
             if (enable_irq) {
                 auto metrics = Video::metrics();
                 Video::enableRasterIrqDebug(enable_raster_debug);
-                Video::addRasterSequenceStep(metrics.num_raster_lines - 70, onVerticalBlank);
+                Video::addRasterSequenceStep(metrics.num_raster_lines - 240 /*70*/, onVerticalBlank);
                 Video::enableRasterIrq();
             }
 
@@ -227,8 +222,6 @@ class Application {
 
         static void onVerticalBlank() {
             if (enable_audio) Audio::update();
-            if (enable_sprites) SpriteBatch::sync();
-            if (enable_starfield) Starfield::update();
         }
 
     public:
@@ -239,6 +232,7 @@ class Application {
 
             for (;;) {
                 if (enable_sprites) SpriteBatch::update();
+                if (enable_starfield) Starfield::update();
                 Video::waitNextFrame();
                 if (!enable_irq) onVerticalBlank();
             }
