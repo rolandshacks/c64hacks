@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 
 set(CMAKE_CXX_STANDARD 20)
 set(ENABLE_LLVM_MOS ON)
-set(ENABLE_MEMORY_MAP OFF)
+set(ENABLE_MEMORY_MAP ON)
 set(ENABLE_DEBUG_INFO OFF)
 set(ENABLE_OPTIMIZATION ON)
 
@@ -34,12 +34,6 @@ endif()
 
 add_subdirectory(libcpp64)
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/linker.ld)
-
-#add_compile_options(-save-temps)
-
-add_link_options(-T${LINKER_SCRIPT})
-
 if(${ENABLE_MEMORY_MAP})
     add_link_options("-Wl,-M")
 endif()
@@ -61,5 +55,3 @@ if(${ENABLE_LLVM_MOS})
 else()
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SUFFIX ".exe")
 endif()
-
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})

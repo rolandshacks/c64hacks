@@ -1,11 +1,4 @@
----
-Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone-*,-bugprone-easily-swappable-parameters'
-WarningsAsErrors: true
-HeaderFilterRegex: ''
-
-#Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,bugprone-*,modernize-*'
-#Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone-*'
-
-#HeaderFilterRegex: 'ignoredfolder/*\.h'
-#HeaderFilterRegex: '(stddef\.h|cstddef|vcruntime\.h)$'
-#HeaderFilterRegex: 'libcpp64/include/libcpp64/syss'
+# clang tidy config
+Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone-*'
+WarningsAsErrors: 'true'
+HeaderFilterRegex: 'libcpp64/include/\*\.h'

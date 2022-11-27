@@ -209,6 +209,9 @@ class Application {
             Video::setBackground(0);
             Video::setBorder(0);
 
+            if (enable_audio) Audio::init();
+            if (enable_sprites) SpriteBatch::init();
+
             if (enable_irq) {
                 auto metrics = Video::metrics();
                 Video::enableRasterIrqDebug(enable_raster_debug);
@@ -216,8 +219,6 @@ class Application {
                 Video::enableRasterIrq();
             }
 
-            if (enable_sprites) SpriteBatch::init();
-            if (enable_audio) Audio::init();
         }
 
         static void onVerticalBlank() {

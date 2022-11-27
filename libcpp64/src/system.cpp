@@ -98,7 +98,7 @@ void System::copyCharset(uint8_t* dest, size_t src_offset, size_t count) noexcep
     memory(0x1) = (oldMemFlags & 0xfb);  // enable access to Character ROM
                                          // instead of mem-mapped I/O at $d000
 
-    //memcpy((uint8_t*) (0xd000 + src_offset), dest, count > 0 ? count : 0x1000);
+    //memcpy(dest, (const uint8_t*) (0xd000 + src_offset), count > 0 ? count : 0x1000);
 
     const uint8_t* src = (const uint8_t*) (0xd000 +  src_offset);
 

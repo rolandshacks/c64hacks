@@ -149,7 +149,10 @@ def sidc(sid_file, output_file):
     out_file.write("#include <cstdint>\n")
 
     out_file.write("\n")
-    out_file.write('volatile uint8_t __sid_data[] __attribute__ ((section (".sid"))) = {\n')
+    #out_file.write('extern const uint8_t sid_data[] __attribute__ ((section (".sid"))) = {\n')
+    out_file.write('extern const uint8_t sid_data[] = {\n')
+
+    sid_music_data_size = sid_size - (data_offset+2)
 
     line = "  "
     for ofs in range(data_offset+2, sid_size):
@@ -170,18 +173,20 @@ def sidc(sid_file, output_file):
     out_file.write("  const uint16_t num_songs;\n")
     out_file.write("  const uint16_t start_song;\n")
     out_file.write("  const uint32_t speed;\n")
+    out_file.write("  const uint16_t size;\n")
     out_file.write("  const uint8_t* data;\n")
     out_file.write("};\n")
     out_file.write("\n")
 
-    out_file.write("sid_info_t sid_info {\n")
-    out_file.write(f"  0x{load_address:04x},       // load address\n")
-    out_file.write(f"  0x{init_address:04x},       // init address\n")
-    out_file.write(f"  0x{play_address:04x},       // play address\n")
-    out_file.write(f"  0x{num_songs:04x},       // song count\n")
-    out_file.write(f"  0x{start_song:04x},       // start song\n")
-    out_file.write(f"  0x{speed:08x},   // speed\n")
-    out_file.write(f"  (const uint8_t*) __sid_data\n")
+    out_file.write("extern const sid_info_t sid_info {\n")
+    out_file.write(f"  0x{load_address:04x},                       // load address\n")
+    out_file.write(f"  0x{init_address:04x},                       // init address\n")
+    out_file.write(f"  0x{play_address:04x},                       // play address\n")
+    out_file.write(f"  0x{num_songs:04x},                       // song count\n")
+    out_file.write(f"  0x{start_song:04x},                       // start song\n")
+    out_file.write(f"  0x{speed:08x},                   // speed\n")
+    out_file.write(f"  0x{sid_music_data_size:04x},                       // size\n")
+    out_file.write(f"  (const uint8_t*) sid_data     // data\n")
     out_file.write("};\n")
 
     out_file.close()

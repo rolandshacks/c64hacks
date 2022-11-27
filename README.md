@@ -1,6 +1,15 @@
 # C64 C++ Demo
 
-Demo for the Commodore C64 written in C++ 17 using Clang for 6502/6510.
+![platform: c64](img/platforms.svg)
+![lang: cpp20](img/lang.svg)
+![dev: emulator](img/dev.svg)
+![license: apache](img/license.svg)
+
+Demo for the Commodore C64 written in C++ 20 using Clang for 6502/6510.
+
+<table><tr>
+  <td style="padding: 20px; padding-right: 40px;"><img src="img/demo.gif" height=136px></td>
+</tr></table>
 
 - Animated sprites
 - Scrolling starfield
@@ -10,7 +19,10 @@ Demo for the Commodore C64 written in C++ 17 using Clang for 6502/6510.
 - Support tools
 - CMake build configuration
 
-Prerequisite: The LLVM-MOS development environment needs to be installed (https://github.com/llvm-mos/llvm-mos-sdk).
+Prerequisites
+
+-  The LLVM-MOS development environment needs to be installed (https://github.com/llvm-mos/llvm-mos-sdk).
+- For development and building, please install the VS64 extension for Visual Studio Code (https://marketplace.visualstudio.com/items?itemName=rosc.vs64)
 
 ## Tools coming with the Demo
 

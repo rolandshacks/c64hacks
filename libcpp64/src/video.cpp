@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <string.h>
 
 #include "libcpp64/video.h"
 
@@ -20,8 +21,6 @@ uint16_t Video::color_base = 0xd800;
 bool Video::raster_irq_debug{false};
 
 void Video::init() noexcept {
-
-    uint8_t sprite_data_ref = __sprite_data[0][0];  // NOLINT
 
     uint8_t acc=0x0;
     asm volatile (
@@ -68,6 +67,10 @@ void Video::setBank(uint8_t bank) noexcept {
     screen_base = (screen_base & 0x3fff) + vic_base;
     char_base = (char_base & 0x3fff) + vic_base;
     bitmap_base = (bitmap_base & 0x3fff) + vic_base;
+
+    size_t sprite_data_size = 1024; // copy 16 sprites (just use 1K as default)
+    memcpy((void*) vic_base, (const void*) sprite_data, sprite_data_size);
+
 }
 
 void Video::setScreenBase(uint8_t base) noexcept {
@@ -340,7 +343,7 @@ void Video::setSpriteMode(uint8_t sprite, bool multicolor) noexcept {
 }
 
 uint8_t Video::getSpriteAddress(const uint8_t* data) noexcept {
-    if (nullptr == data) data = __sprite_data[0];
+    if (nullptr == data) return (uint8_t) 0;
     uint8_t block = (uint8_t) ((reinterpret_cast<uint16_t>(data) - vic_base) / 64);
     return block;
 }

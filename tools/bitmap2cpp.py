@@ -209,7 +209,7 @@ def save(filename, content):
     lines.append("// clang-format off")
     lines.append("////////////////////////////////////////////////////////////////////////////////")
     lines.append("\n#include <cstdint>\n")
-    lines.append("uint8_t __sprite_data[][64] __attribute__ ((section (\".sprites\"))) = {\n")
+    lines.append("extern const uint8_t sprite_data[] = {\n")
     header = "\n".join(lines)
 
     lines = []

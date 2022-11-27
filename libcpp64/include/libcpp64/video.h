@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string.h>
 
-extern uint8_t __sprite_data[][64];
+extern const uint8_t sprite_data[];
 
 namespace sys {
 
@@ -63,7 +63,7 @@ class Video {
         static void setSpriteColor(uint8_t sprite, uint8_t color) noexcept;
         static void setSpriteCommonColors(uint8_t colorA, uint8_t colorB) noexcept;
         static uint8_t getSpriteAddress(const uint8_t* data=nullptr) noexcept;
-        
+
     public:
         static void enableRasterIrq() noexcept;
         static void setRasterIrqLine(uint16_t line) noexcept;

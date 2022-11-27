@@ -12,11 +12,12 @@ struct sid_info_t {
   const uint16_t num_songs;
   const uint16_t start_song;
   const uint32_t speed;
+  const uint16_t size;
   const uint8_t* data;
 };
 
-extern sid_info_t sid_info;
-extern volatile uint8_t __sid_data[];
+extern const sid_info_t sid_info;
+extern const uint8_t sid_data[];
 
 namespace sys {
 
@@ -25,7 +26,7 @@ class Audio {
         static void init();
         static inline void update() {
             asm volatile (
-                "JSR %0"
+                "jsr %0\n"
                 ::
                 "n"(sid_info.play_address)
             );
