@@ -1,6 +1,15 @@
 # C64 C++ Demo
 
-Demo for the Commodore C64 written in C++ 17 using Clang for 6502/6510.
+![platform: c64](img/platforms.svg)
+![lang: cpp20](img/lang.svg)
+![dev: emulator](img/dev.svg)
+![license: apache](img/license.svg)
+
+Demo for the Commodore C64 written in C++ 20 using Clang for 6502/6510.
+
+<table><tr>
+  <td style="padding: 20px; padding-right: 40px;"><img src="img/demo.gif" height=136px></td>
+</tr></table>
 
 - Animated sprites
 - Scrolling starfield
