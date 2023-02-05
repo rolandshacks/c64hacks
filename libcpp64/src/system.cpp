@@ -3,34 +3,22 @@
 
 #include "libcpp64/system.h"
 
-#if (MOS_EMULATOR)
-static uint8_t *debug_memory = nullptr;
-
-static address_t sys::make_address(const uint16_t addr) {
-    if (nullptr == debug_memory) {
-        debug_memory = new uint8_t[65536];
-        for (auto i = 0; i < 65536; i++) debug_memory[i] = static_cast<uint8_t>(i % 256);
-    }
-    return (debug_memory + addr);
-}
-#endif
-
 volatile uint8_t& sys::memory(const uint16_t address) {
-    #if (MOS_CPU)
-        return *(reinterpret_cast<address_t>(address));
-    #else
-        return *make_address(address);
-    #endif
+    return *(reinterpret_cast<address_t>(address));
 }
 
 void sys::set_bit(const uint16_t address, uint8_t bit, bool enabled) {
-    auto ptr = reinterpret_cast<address_t>(address);
-    auto value = (enabled) ? *ptr | (1 << bit) : *ptr & ~(1 << bit);
+    static address_t ptr;
+    static uint8_t value;
+
+    ptr = reinterpret_cast<address_t>(address);
+    value = (enabled) ? *ptr | (1 << bit) : *ptr & ~(1 << bit);
     *ptr = value;
 }
 
 [[nodiscard]] bool sys::get_bit(const uint16_t address, uint8_t bit) {
-    auto ptr = reinterpret_cast<address_t>(address);
+    static address_t ptr;
+    ptr = reinterpret_cast<address_t>(address);
     return (*ptr & (1 << bit)) != 0x0;
 }
 
@@ -49,14 +37,6 @@ void System::enableInterrupts() noexcept {
     asm volatile("cli");
 }
 
-void System::readMemory(uint16_t addr) noexcept {
-    asm volatile(
-        "lda %0"
-        ::
-        "n"(addr)
-    );
-}
-
 void System::disableKernalAndBasic() noexcept {
     kernalAndBasicDisabled = true;
 
@@ -66,9 +46,10 @@ void System::disableKernalAndBasic() noexcept {
     memory(0xdd0d) = 0x7f;              // kernal uses such an interrupt to flash the cursor and
                                         // scan the keyboard, so we better stop it.
 
-    System::readMemory(0xdc0d);         // by reading this two registers we negate any pending CIA irqs.
-    System::readMemory(0xdd0d);         // if we don't do this, a pending CIA irq might occur after
-                                        // we finish setting up our irq. we don't want that to happen.
+    asm volatile(                       // by reading this two registers we negate any pending CIA irqs.
+        "lda $dc0d\n"                   // if we don't do this, a pending CIA irq might occur after
+        "lda $dd0d\n"                   // we finish setting up our irq. we don't want that to happen.
+    );
 
     memory(0xd01a) = 0x0;               // clear VIC interrupt mask bits
     memory(0xd019) = 0x0;               // clear VIC interrupt request bits

@@ -4,6 +4,13 @@
 #include <sys>
 using namespace sys;
 
+const int16_t spriteMinX = 192;
+const int16_t spriteMaxX = 2591;
+const int16_t spriteMinY = 0;
+const int16_t spriteMaxY = 1847;
+const int16_t spriteMaxVY = 80;
+const uint8_t spriteMaxFrame = 5;
+
 struct Sprite {
 
     uint8_t id{0};
@@ -11,8 +18,11 @@ struct Sprite {
     int16_t y{0};
     int16_t vx{0};
     int16_t vy{0};
+    uint8_t xdir{0};
     uint8_t address{0};
     uint8_t animation{0};
+    uint8_t animation_delay{0};
+    uint8_t animation_counter{0};
 
     Sprite()
     {}
@@ -26,13 +36,15 @@ struct Sprite {
     }
 
     inline void updatePos() const {
-        uint16_t sx = (x > 0) ? x : 0;
-        uint16_t sy = (y > 0) ? y : 0;
-        Video::setSpritePos(id, sx>>3, sy>>3);
+        if (x <= 0 || y <= 0) {
+            Video::setSpritePos(id, 0, 0);
+            return;
+        }
+        Video::setSpritePos(id, x>>3, y>>3);
     }
 
     inline void updateAnimation() const {
-        Video::setSpriteAddress(id, this->address + (animation>>3));
+        Video::setSpriteAddress(id, this->address + animation);
     }
 
 };
@@ -59,9 +71,14 @@ namespace SpriteBatch {
             sprite.set(true, block_index, col, true);
 
             sprite.x = (int16_t) (Constants::Width / 3 + i * 300);
-            sprite.y = (int16_t) (- i * 100);
             sprite.vx = (int16_t) (25 + i);
+            sprite.xdir = 0;
+
+            sprite.y = (int16_t) (- i * 100);
             sprite.vy = (int16_t) (- i * 30);
+
+            sprite.animation_delay = 1 + i/2;
+
             sprite.updatePos();
             sprite.updateAnimation();
 
@@ -73,35 +90,52 @@ namespace SpriteBatch {
 
         for (auto& sprite : sprites) {
 
-            sprite.x += sprite.vx;
-            if (sprite.x > 2591) {
-                sprite.x = 2591;
-                sprite.vx = -sprite.vx;
-            } else if (sprite.x < 192) {
-                sprite.x = 192;
-                sprite.vx = -sprite.vx;
+            if (sprite.animation_counter >= sprite.animation_delay) {
+                sprite.animation_counter -= sprite.animation_delay;
+                if (sprite.xdir == 0) {
+                    if (sprite.animation == spriteMaxFrame) {
+                        sprite.animation = 0;
+                    } else {
+                        sprite.animation++;
+                    }
+                } else {
+                    if (sprite.animation == 0) {
+                        sprite.animation = spriteMaxFrame;
+                    } else {
+                        sprite.animation--;
+                    }
+                }
+
+            } else {
+                sprite.animation_counter++;
+            }
+
+            if (sprite.xdir == 0) {
+                sprite.x += sprite.vx;
+                if (sprite.x > spriteMaxX) {
+                    sprite.x = spriteMaxX;
+                    sprite.xdir = 1;
+                }
+            } else {
+                sprite.x -= sprite.vx;
+                if (sprite.x < spriteMinX) {
+                    sprite.x = spriteMinX;
+                    sprite.xdir = 0;
+                }
             }
 
             sprite.y += sprite.vy;
-            if (sprite.y > 1847) {
-                sprite.y = 1847;
-                sprite.vy = -80;
+            if (sprite.y > spriteMaxY) {
+                sprite.y = spriteMaxY;
+                sprite.vy = -spriteMaxVY;
             }
 
             sprite.vy += 3;
-            if (sprite.vy > 80) sprite.vy = 80;
-
-            uint8_t da = 3 + (sprite.id % 3);
-            if (sprite.vx >= 0) {
-                sprite.animation = (sprite.animation + da) % 48;
-            } else {
-                sprite.animation = (sprite.animation + 48 - da) % 48;
-            }
+            if (sprite.vy > spriteMaxVY) sprite.vy = spriteMaxVY;
 
             sprite.updatePos();
             sprite.updateAnimation();
         }
-
     }
 
 } // namespace
@@ -139,9 +173,9 @@ namespace Starfield {
 
         // init color buffer
         uint8_t y = stars_y;
-        uint8_t* linePtr = (uint8_t*) Video::getColorBasePtr() + y * 40;
+        auto linePtr = Video::getColorPtr(y);
         while (y < 25) {
-            memset(linePtr, star_color[y%3], 40);
+            memset((void*) linePtr, star_color[y%3], 40);
             linePtr += (size_t) (40 * step_size);
             y += step_size;
         }
@@ -149,7 +183,8 @@ namespace Starfield {
 
     static void update() {
 
-        uint8_t y = stars_y;
+        static uint8_t y;
+        y = stars_y;
 
         for (auto& star : stars) {
             if (y >= 25) break;
@@ -215,8 +250,8 @@ class Application {
             if (enable_irq) {
                 auto metrics = Video::metrics();
                 Video::enableRasterIrqDebug(enable_raster_debug);
-                Video::addRasterSequenceStep(metrics.num_raster_lines - 240 /*70*/, onVerticalBlank);
-                Video::enableRasterIrq();
+                Video::addRasterSequenceStep(metrics.num_raster_lines - 60, onVerticalBlank);
+                Video::enableRasterSequence();
             }
 
         }

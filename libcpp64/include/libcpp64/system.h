@@ -3,14 +3,6 @@
 #include <cstdint>
 #include <string.h>
 
-#if defined(__C64__) || defined(__CBM__) || defined(__NES__) || defined(__MEGA65__)
-#define MOS_CPU 1
-#define MOS_EMULATOR 0
-#else  // defined(_WIN32) || defined(__linux__) || defined(__APPLE__)
-#define MOS_CPU 0
-#define MOS_EMULATOR 1
-#endif
-
 using address_t = volatile uint8_t*;
 
 namespace sys {
@@ -66,7 +58,6 @@ class System {
         static void enableInterrupts() noexcept;
         static void disableKernalAndBasic() noexcept;
         static void enableKernalAndBasic() noexcept;
-        static void readMemory(uint16_t addr) noexcept;
         static bool isKernalAndBasicDisabled() noexcept { return kernalAndBasicDisabled; }
         static void memMap(uint8_t bits) noexcept;
         static void copyCharset(uint8_t* dest, size_t src_offset=0, size_t count=0) noexcept;

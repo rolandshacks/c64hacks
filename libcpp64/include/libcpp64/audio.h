@@ -24,13 +24,7 @@ namespace sys {
 class Audio {
     public:
         static void init();
-        static inline void update() {
-            asm volatile (
-                "jsr %0\n"
-                ::
-                "n"(sid_info.play_address)
-            );
-        }
+        static void update();
 };
 
 }  // namespace sys

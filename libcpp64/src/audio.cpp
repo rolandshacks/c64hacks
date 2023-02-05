@@ -4,6 +4,9 @@
 
 #include "libcpp64/audio.h"
 
+extern "C" void init_audio(void);
+extern "C" void update_audio(void);
+
 using namespace sys;
 
 void Audio::init() {
@@ -15,6 +18,9 @@ void Audio::init() {
         memcpy(loadAddress, srcAddress, sid_info.size);
     }
 
+    init_audio();
+
+    /*
     asm volatile(
         "LDA #$00\n\t"
         "LDY #$00\n\t"
@@ -23,5 +29,20 @@ void Audio::init() {
         "n"(sid_info.init_address),
         "x"((uint8_t) sid_info.start_song)
     );
+    */
 
+}
+
+void Audio::update() {
+ {
+    update_audio();
+
+    /*
+    asm volatile (
+        "jsr %0\n"
+        ::
+        "n"(sid_info.play_address)
+    );
+    */
+}   
 }

@@ -49,6 +49,8 @@ class Video {
         static volatile uint8_t* getBitmapBasePtr() noexcept { return (address_t)(bitmap_base); };
         static volatile uint8_t* getCharacterBasePtr() noexcept { return (address_t)(char_base); };
         static volatile uint8_t* getCharacterBasePtr(uint8_t base) noexcept { return (address_t)(vic_base + base * 0x800); };
+        static volatile uint8_t* getScreenPtr(uint8_t row) noexcept { return (address_t)(row_addresses[row]); };
+        static volatile uint8_t* getColorPtr(uint8_t row) noexcept { return (address_t)(col_addresses[row]); };
 
     public:
         static void setScrollX(uint8_t offset) noexcept;
@@ -65,7 +67,8 @@ class Video {
         static uint8_t getSpriteAddress(const uint8_t* data=nullptr) noexcept;
 
     public:
-        static void enableRasterIrq() noexcept;
+        static void enableRasterSequence() noexcept;
+        static void enableRasterIrq(interrupt_handler_t fn, uint16_t raster_line) noexcept;
         static void setRasterIrqLine(uint16_t line) noexcept;
         static void addRasterSequenceStep(uint16_t line, interrupt_handler_t fn) noexcept;
         static inline uint8_t getCurrentRasterSequenceStep() noexcept { return raster_sequence_step; }
@@ -98,17 +101,16 @@ class Video {
         static void puts(uint8_t x, uint8_t y, const char* s, uint8_t col) noexcept;
 
         static inline void putc(uint8_t x, uint8_t y, uint8_t c) noexcept {
-            memory(screen_base + (y * 40 + x)) = c;
+            *((address_t) row_addresses[y] + x) = c;
         }
 
         static inline void putc(uint8_t x, uint8_t y, uint8_t c, uint8_t col) noexcept {
-            auto ofs = y * 40 + x;
-            memory(screen_base + ofs) = c;
-            memory(color_base + ofs) = col;
+            *((address_t) row_addresses[y] + x) = c;
+            *((address_t) col_addresses[y] + x) = col;
         }
 
         [[nodiscard]] static inline uint8_t getc(uint8_t x, uint8_t y) noexcept {
-            return memory(screen_base + (y*40+x));
+            return *((address_t) row_addresses[y] + x);
         }
 
         static void printNumber(uint8_t x, uint8_t y, uint8_t n) noexcept;
@@ -125,6 +127,10 @@ class Video {
         static void waitLines(uint16_t lines) noexcept;
 
     private:
+        static void setScreenPtrs() noexcept;
+        static void setColorPtrs() noexcept;
+
+    private:
         struct raster_step_t {
             uint16_t line{0xffff};
             interrupt_handler_t fn{nullptr};
@@ -136,6 +142,8 @@ class Video {
         static volatile uint16_t last_frame_counter_;
         static bool raster_irq_enabled;
         static raster_step_t raster_sequence[8];
+        static uint16_t row_addresses[25];
+        static uint16_t col_addresses[25];
         static volatile uint8_t raster_sequence_step;
         static uint8_t raster_sequence_step_count;
         static bool raster_irq_debug;
@@ -144,6 +152,7 @@ class Video {
         static uint16_t char_base;
         static uint16_t bitmap_base;
         static uint16_t color_base;
+        static uint16_t sprite_base;
 };
 
 }  // namespace sys

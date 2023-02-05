@@ -126,3 +126,18 @@ extern const sid_info_t sid_info {
   0x08e0,                       // size
   (const uint8_t*) sid_data     // data
 };
+
+asm (
+  ".text\n"
+  ".global init_audio\n"
+  "init_audio:\n"
+  "  lda #0\n"
+  "  ldy #0\n"
+  "  ldx #$01\n"
+  "  jsr $5000\n"
+  "  rts\n"
+  ".global update_audio\n"
+  "update_audio:\n"
+  "  jsr $5003\n"
+  "  rts\n"
+);
