@@ -28,15 +28,17 @@ void Video::init() noexcept {
 
     uint8_t acc=0x0;
     asm volatile (
-        "w0:  LDA $D012\n"
-        "w1:  CMP $D012\n"
-        "BEQ w1\n"
-        "BMI w0\n"
+        "pha\n"
+        "w0: lda $d012\n"
+        "w1: cmp $d012\n"
+        "beq w1\n"
+        "bmi w0\n"
+        "pla\n"
         : "=a" (acc)
         :
     );
-
     metrics_.num_raster_lines = 256 + acc + 1;
+
     if (metrics_.num_raster_lines > 300) {
         // PAL = 312 (63 cycles per line)
         metrics_.is_pal = true;
@@ -79,7 +81,7 @@ void Video::setBank(uint8_t bank) noexcept {
     setScreenPtrs();
 
     size_t sprite_data_size = 1024; // copy 16 sprites (just use 1K as default)
-    memcpy((void*) vic_base, (const void*) sprite_data, sprite_data_size);
+    memcpy((void*) vic_base, (const void*) sprites, sprite_data_size);
 
 }
 
@@ -189,7 +191,7 @@ void Video::enableRasterIrq(interrupt_handler_t fn, uint16_t raster_line) noexce
     interrupt_handler_t* irq_address = reinterpret_cast<interrupt_handler_t*>(
         System::isKernalAndBasicDisabled() ? Constants::HARDWARE_IRQ : Constants::KERNAL_IRQ
     );
-    
+
     *irq_address = fn;
 
     System::enableInterrupts();         // clear interrupt flag, allowing the CPU to respond to interrupt requests

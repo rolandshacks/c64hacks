@@ -140,3 +140,8 @@ LLVM Assembler and Inline Assembler
 - Have a look at the GNU assembler
 - https://llvm.org/docs/LangRefhtml#inline-assembler-expressions
 - https://llvm.org/docs/LangRef.html#inline-asm-modifiers
+
+GoatTracker2 SID Generation
+
+- gt2reloc music.sng music.sid -B0 -D0 -E0 -H0 -C0 -I1 -J0 -W50 -ZFE
+

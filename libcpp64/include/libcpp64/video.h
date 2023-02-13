@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string.h>
 
-extern const uint8_t sprite_data[];
+extern const uint8_t sprites[];
 
 namespace sys {
 

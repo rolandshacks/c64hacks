@@ -7,7 +7,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "label": "build testprog"
+            "label": "build project"
         }
     ]
 }

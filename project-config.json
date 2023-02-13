@@ -1,21 +1,22 @@
 {
-    "name": "cppdemo",
-    "description": "C64 C++ Demo",
+    "name": "c64hacks",
+    "description": "Project c64hacks",
     "toolkit": "llvm",
     "sources": [
-        "src/main.cpp",
         "libcpp64/src/audio.cpp",
         "libcpp64/src/auxiliary.cpp",
         "libcpp64/src/keyboard.cpp",
         "libcpp64/src/system.cpp",
         "libcpp64/src/video.cpp",
-        "resources/music.cpp",
-        "resources/sprites.cpp",
-        "resources/tables.cpp"
+        "resources/music.sid",
+        "resources/sprites.spm",
+        "src/main.cpp"
     ],
     "build": "release",
     "definitions": [],
-    "includes": [ "libcpp64/include" ],
+    "includes": [
+        "libcpp64/include"
+    ],
     "args": [],
     "compiler": ""
 }

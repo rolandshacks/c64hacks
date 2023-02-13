@@ -6,7 +6,6 @@ using namespace sys;
 
 const int16_t spriteMinX = 192;
 const int16_t spriteMaxX = 2591;
-const int16_t spriteMinY = 0;
 const int16_t spriteMaxY = 1847;
 const int16_t spriteMaxVY = 80;
 const uint8_t spriteMaxFrame = 5;
@@ -59,8 +58,6 @@ namespace SpriteBatch {
         Video::setSpriteCommonColors(1, 11);
 
         uint8_t sprite_colors[] = {2,6,2,11,2,4,2,9};
-
-        auto& metrics = Video::metrics();
 
         uint8_t block_index = Video::getSpriteAddress();
         uint8_t i = 0;
