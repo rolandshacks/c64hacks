@@ -83,6 +83,8 @@ class Video {
 
     public:
         static void clear(uint8_t c = 0x20) noexcept;
+        static void fill(uint8_t c, size_t ofs, size_t count) noexcept;
+        static void fillColor(uint8_t c, size_t ofs, size_t count) noexcept;
 
     public:
         [[nodiscard]] static inline uint8_t getBackground() noexcept { return memory(Constants::BackgroundColorRegister); };
@@ -99,6 +101,7 @@ class Video {
     public:
         static void puts(uint8_t x, uint8_t y, const char* s) noexcept;
         static void puts(uint8_t x, uint8_t y, const char* s, uint8_t col) noexcept;
+        static void putStrCharData(uint8_t x, uint8_t y, const char* data, uint8_t data_ofs, uint8_t col) noexcept;
 
         static inline void putc(uint8_t x, uint8_t y, uint8_t c) noexcept {
             *((address_t) row_addresses[y] + x) = c;

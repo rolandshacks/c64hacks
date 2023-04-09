@@ -308,6 +308,14 @@ void Video::clear(uint8_t c) noexcept {
     __memset((char*) ((address_t)(screen_base)), c, 1000);
 }
 
+void Video::fill(uint8_t c, size_t ofs, size_t count) noexcept {
+    __memset((char*) ((address_t)(screen_base + ofs)), c, count);
+}
+
+void Video::fillColor(uint8_t c, size_t ofs, size_t count) noexcept {
+    __memset((char*) ((address_t)(color_base + ofs)), c, count);
+}
+
 uint8_t char_to_screencode(char c) {
 
     uint8_t s = (uint8_t) c;
@@ -322,6 +330,15 @@ void Video::puts(uint8_t x, uint8_t y, const char* s) noexcept {
     auto ptr = getScreenPtr(y) + x;
     while (*s) {
         *(ptr++) = char_to_screencode(*(s++));
+    }
+}
+
+void Video::putStrCharData(uint8_t x, uint8_t y, const char* data, uint8_t data_ofs, uint8_t col) noexcept {
+    auto ptr = getScreenPtr(y) + x;
+    auto ptr_col = getColorPtr(y) + x;
+    while (*data) {
+        *(ptr++) = char_to_screencode(*(data++)) + data_ofs;
+        *(ptr_col++) = col;
     }
 }
 

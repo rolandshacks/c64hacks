@@ -5,10 +5,11 @@
 using namespace sys;
 
 extern const uint8_t charset[];
+const size_t charset_size = 53;
 
 const int16_t spriteMinX = 192;
 const int16_t spriteMaxX = 2591;
-const int16_t spriteMaxY = 1847;
+const int16_t spriteMaxY = 1775;
 const int16_t spriteMaxVY = 80;
 const uint8_t spriteMaxFrame = 5;
 
@@ -149,10 +150,11 @@ namespace Starfield {
 
     const size_t num_stars = 12;
     Star stars[num_stars] = {};
-    const uint8_t star_char_base = 0x25; // 0x20..0x28
+    const uint8_t star_char_base = charset_size; // use chars after custom charset
     const uint8_t star_color[] = { 0xf, 0xc, 0x1 };
     const uint8_t stars_y = 2;
     const uint8_t step_size = 2;
+    const uint8_t stars_yend = 23;
 
     static void init() {
         // prepare charset
@@ -174,7 +176,7 @@ namespace Starfield {
         // init color buffer
         uint8_t y = stars_y;
         auto linePtr = Video::getColorPtr(y);
-        while (y < 25) {
+        while (y < stars_yend) {
             memset((void*) linePtr, star_color[y%3], 40);
             linePtr += (size_t) (40 * step_size);
             y += step_size;
@@ -187,7 +189,7 @@ namespace Starfield {
         y = stars_y;
 
         for (auto& star : stars) {
-            if (y >= 25) break;
+            if (y >= stars_yend) break;
 
             if (star.x >= 40) {
                 star.x--;
@@ -235,7 +237,7 @@ class Application {
             Video::setGraphicsMode(GraphicsMode::StandardTextMode);
             Video::setScreenBase(0x1);
 
-            System::copyCharset(charset, (uint8_t*) Video::getCharacterBasePtr(0x1), 14);
+            System::copyCharset(charset, (uint8_t*) Video::getCharacterBasePtr(0x1), charset_size);
             Video::setCharacterBase(0x1);
 
             if (enable_starfield) Starfield::init();
@@ -264,7 +266,20 @@ class Application {
         static void main() {
             init();
 
-            Video::puts(14, 0, "ABCDEFGHIJKLM", 7);
+            Video::fill(51, 0, 40);
+            Video::fillColor(14, 0, 40);
+
+            Video::fill(52, 40, 40);
+            Video::fillColor(11, 40, 40);
+
+            Video::fill(51, 920, 40);
+            Video::fillColor(14, 920, 40);
+
+            Video::fill(52, 960, 40);
+            Video::fillColor(11, 960, 40);
+
+            Video::putStrCharData(10, 0, "ABCDEFGHIJKLMNOPQRSTU", 2, 7);
+            Video::putStrCharData(10, 1, "ABCDEFGHIJKLMNOPQRSTU", 27, 7);
 
             for (;;) {
                 if (enable_sprites) SpriteBatch::update();
