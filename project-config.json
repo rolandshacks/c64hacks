@@ -10,6 +10,7 @@
         "libcpp64/src/video.cpp",
         "resources/music.sid",
         "resources/sprites.spm",
+        "resources/charset.ctm",
         "src/main.cpp"
     ],
     "build": "release",

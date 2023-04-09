@@ -60,7 +60,8 @@ class System {
         static void enableKernalAndBasic() noexcept;
         static bool isKernalAndBasicDisabled() noexcept { return kernalAndBasicDisabled; }
         static void memMap(uint8_t bits) noexcept;
-        static void copyCharset(uint8_t* dest, size_t src_offset=0, size_t count=0) noexcept;
+        static void copyRomCharset(uint8_t* dest, size_t src_offset=0, size_t char_count=0) noexcept;
+        static void copyCharset(const uint8_t* src, uint8_t* dest, size_t char_count) noexcept;
 
     public:
         [[nodiscard]] static constexpr uint8_t get_compiler_standard() noexcept;

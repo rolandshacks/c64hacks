@@ -73,25 +73,44 @@ void System::memMap(uint8_t bits) noexcept {
 }
 
 // NOLINTNEXTLINE
-void System::copyCharset(uint8_t* dest, size_t src_offset, size_t count) noexcept {
+void System::copyRomCharset(uint8_t* dest, size_t src_offset, size_t char_count) noexcept {
+    const uint8_t* src = (const uint8_t*) (0xd000 +  src_offset);
+
     disableInterrupts();
     uint8_t oldMemFlags = memory(0x01);
     memory(0x1) = (oldMemFlags & 0xfb);  // enable access to Character ROM
                                          // instead of mem-mapped I/O at $d000
 
-    //memcpy(dest, (const uint8_t*) (0xd000 + src_offset), count > 0 ? count : 0x1000);
-
-    const uint8_t* src = (const uint8_t*) (0xd000 +  src_offset);
-
-    if (0 == count) count = 0x1000; // default size
-    while (count) {
+    if (0 == char_count) char_count = 256; // default size 2K
+    while (char_count) {
+        *(dest++) = *(src++); // 8 bytes per character
         *(dest++) = *(src++);
-        count--;
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        char_count--;
     }
 
     memory(0x01) = oldMemFlags;
 
     enableInterrupts();
+}
+
+void System::copyCharset(const uint8_t* src, uint8_t* dest, size_t char_count) noexcept {
+    while (char_count) {
+        *(dest++) = *(src++); // 8 bytes per character
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        *(dest++) = *(src++);
+        char_count--;
+    }
 }
 
 [[nodiscard]] constexpr uint8_t System::get_compiler_standard() noexcept {

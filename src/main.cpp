@@ -4,6 +4,8 @@
 #include <sys>
 using namespace sys;
 
+extern const uint8_t charset[];
+
 const int16_t spriteMinX = 192;
 const int16_t spriteMaxX = 2591;
 const int16_t spriteMaxY = 1847;
@@ -147,7 +149,7 @@ namespace Starfield {
 
     const size_t num_stars = 12;
     Star stars[num_stars] = {};
-    const uint8_t star_char_base = 0x21; // 0x21..0x28
+    const uint8_t star_char_base = 0x25; // 0x20..0x28
     const uint8_t star_color[] = { 0xf, 0xc, 0x1 };
     const uint8_t stars_y = 2;
     const uint8_t step_size = 2;
@@ -155,10 +157,11 @@ namespace Starfield {
     static void init() {
         // prepare charset
         auto charset = (uint8_t*) Video::getCharacterBasePtr();
-        for (int i=0; i<8; i++) {
-            auto ptr = charset + (star_char_base + i) * 8;
-            memset(ptr, 0, 8);
+        auto ptr = charset + (star_char_base << 3);
+        memset(ptr, 0x0, 72); ptr += 8; // make all 9 chars blank
+        for (int i=0; i<8; i++) { // now set pixel-wise sprite movement
             *ptr = (1<<i);
+            ptr += 8;
         }
 
         // init stars
@@ -195,7 +198,7 @@ namespace Starfield {
             star.shift += star.speed;
             if (star.shift >= 8) {
                 star.shift -= 8;
-                Video::putc(star.x, y, 0x20);
+                Video::putc(star.x, y, star_char_base);
                 if (star.x == 0) {
                     star.x = 40 + (sys::rand()>>2);
                     y += step_size;
@@ -205,7 +208,7 @@ namespace Starfield {
                 }
             }
 
-            Video::putc(star.x, y, star_char_base + star.shift);
+            Video::putc(star.x, y, star_char_base + 1 + star.shift);
             y += step_size;
 
         }
@@ -232,12 +235,12 @@ class Application {
             Video::setGraphicsMode(GraphicsMode::StandardTextMode);
             Video::setScreenBase(0x1);
 
-            System::copyCharset((uint8_t*) Video::getCharacterBasePtr(1));
+            System::copyCharset(charset, (uint8_t*) Video::getCharacterBasePtr(0x1), 14);
             Video::setCharacterBase(0x1);
 
             if (enable_starfield) Starfield::init();
 
-            Video::clear();
+            Video::clear(0x0); //Starfield::star_char_base);
             Video::setBackground(0);
             Video::setBorder(0);
 
@@ -261,7 +264,7 @@ class Application {
         static void main() {
             init();
 
-            Video::puts(15, 0, "Hello World", 8);
+            Video::puts(14, 0, "ABCDEFGHIJKLM", 7);
 
             for (;;) {
                 if (enable_sprites) SpriteBatch::update();
