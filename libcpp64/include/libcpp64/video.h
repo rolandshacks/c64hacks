@@ -65,6 +65,7 @@ class Video {
         static void setSpriteColor(uint8_t sprite, uint8_t color) noexcept;
         static void setSpriteCommonColors(uint8_t colorA, uint8_t colorB) noexcept;
         static uint8_t getSpriteAddress(const uint8_t* data=nullptr) noexcept;
+        static void setTextCommonColors(uint8_t colorA, uint8_t colorB) noexcept;
 
     public:
         static void enableRasterSequence() noexcept;

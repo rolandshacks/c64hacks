@@ -316,6 +316,11 @@ void Video::fillColor(uint8_t c, size_t ofs, size_t count) noexcept {
     __memset((char*) ((address_t)(color_base + ofs)), c, count);
 }
 
+void Video::setTextCommonColors(uint8_t colorA, uint8_t colorB) noexcept {
+    memory(0xd022) = colorA; // color of "01"
+    memory(0xd023) = colorB; // color 0f "10"
+}
+
 uint8_t char_to_screencode(char c) {
 
     uint8_t s = (uint8_t) c;

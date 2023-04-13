@@ -152,7 +152,7 @@ namespace Starfield {
     Star stars[num_stars] = {};
     const uint8_t star_char_base = charset_size; // use chars after custom charset
     const uint8_t star_color[] = { 0xf, 0xc, 0x1 };
-    const uint8_t stars_y = 2;
+    const uint8_t stars_y = 3;
     const uint8_t step_size = 2;
     const uint8_t stars_yend = 23;
 
@@ -252,10 +252,20 @@ class Application {
             if (enable_irq) {
                 auto metrics = Video::metrics();
                 Video::enableRasterIrqDebug(enable_raster_debug);
+                Video::addRasterSequenceStep(55, onSwitchOnHighRes);
+                Video::addRasterSequenceStep(metrics.num_raster_lines - 100, onSwitchOnMultiColor);
                 Video::addRasterSequenceStep(metrics.num_raster_lines - 60, onVerticalBlank);
                 Video::enableRasterSequence();
             }
 
+        }
+
+        static void onSwitchOnMultiColor() {
+            Video::setGraphicsMode(GraphicsMode::MulticolorTextMode);
+        }
+
+        static void onSwitchOnHighRes() {
+            Video::setGraphicsMode(GraphicsMode::StandardTextMode);
         }
 
         static void onVerticalBlank() {
@@ -266,19 +276,23 @@ class Application {
         static void main() {
             init();
 
+            Video::setTextCommonColors(15, 11);
+
+            const uint8_t lineColor = 9;
+
             Video::fill(51, 0, 40);
-            Video::fillColor(14, 0, 40);
+            Video::fillColor(lineColor, 0, 40);
 
             Video::fill(52, 40, 40);
-            Video::fillColor(11, 40, 40);
+            Video::fillColor(lineColor, 40, 40);
 
             Video::fill(51, 920, 40);
-            Video::fillColor(14, 920, 40);
+            Video::fillColor(lineColor, 920, 40);
 
             Video::fill(52, 960, 40);
-            Video::fillColor(11, 960, 40);
+            Video::fillColor(lineColor, 960, 40);
 
-            Video::putStrCharData(10, 0, "ABCDEFGHIJKLMNOPQRSTU", 2, 7);
+            Video::putStrCharData(10, 0, "ABCDEFGHIJKLMNOPQRSTU", 2, 1);
             Video::putStrCharData(10, 1, "ABCDEFGHIJKLMNOPQRSTU", 27, 7);
 
             for (;;) {
