@@ -7,3 +7,5 @@
 *~
 build
 project-config.json.backup
+.vscode/c_cpp_properties.json
+.vscode/settings.json

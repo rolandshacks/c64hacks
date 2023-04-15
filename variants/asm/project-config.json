@@ -1,0 +1,12 @@
+{
+    "name": "example",
+    "description": "Example project",
+    "toolkit": "acme",
+    "sources": [
+        "src/main.asm",
+        "../../resources/sprites.spd"
+    ],
+    "build": "release",
+    "definitions": [],
+    "includes": ["lib64/include"]
+}
