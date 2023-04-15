@@ -8,10 +8,10 @@
         "libcpp64/src/keyboard.cpp",
         "libcpp64/src/system.cpp",
         "libcpp64/src/video.cpp",
+        "src/main.cpp",
         "resources/music.sid",
-        "resources/sprites.spm",
-        "resources/charset.ctm",
-        "src/main.cpp"
+        "resources/sprites.spd",
+        "resources/charset.ctm"
     ],
     "build": "release",
     "definitions": [],
