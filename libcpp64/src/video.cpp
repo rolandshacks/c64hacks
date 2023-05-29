@@ -80,8 +80,7 @@ void Video::setBank(uint8_t bank) noexcept {
 
     setScreenPtrs();
 
-    size_t sprite_data_size = 1024; // copy 16 sprites (just use 1K as default)
-    memcpy((void*) vic_base, (const void*) sprites, sprite_data_size);
+    memcpy((void*) vic_base, (const void*) sprites, sprites_size);
 
 }
 

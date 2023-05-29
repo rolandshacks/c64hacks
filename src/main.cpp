@@ -5,7 +5,7 @@
 using namespace sys;
 
 extern const uint8_t charset[];
-const size_t charset_size = 53;
+extern const size_t charset_size;
 
 const int16_t spriteMinX = 192;
 const int16_t spriteMaxX = 2591;
@@ -150,7 +150,7 @@ namespace Starfield {
 
     const size_t num_stars = 12;
     Star stars[num_stars] = {};
-    const uint8_t star_char_base = charset_size; // use chars after custom charset
+    const uint8_t star_char_base = (charset_size / 8); // use chars after custom charset
     const uint8_t star_color[] = { 0xf, 0xc, 0x1 };
     const uint8_t stars_y = 3;
     const uint8_t step_size = 2;
@@ -237,7 +237,7 @@ class Application {
             Video::setGraphicsMode(GraphicsMode::StandardTextMode);
             Video::setScreenBase(0x1);
 
-            System::copyCharset(charset, (uint8_t*) Video::getCharacterBasePtr(0x1), charset_size);
+            System::copyCharset(charset, (uint8_t*) Video::getCharacterBasePtr(0x1), charset_size/8);
             Video::setCharacterBase(0x1);
 
             if (enable_starfield) Starfield::init();

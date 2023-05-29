@@ -10,9 +10,9 @@ strcpy_fn ; (addr0, addr1), max 255 chars
     ldy #0
 
 strcpy_loop
-    lda (regw0),Y
+    lda (reg0),Y
     beq strcpy_end
-    sta (regw1),Y
+    sta (reg1),Y
     iny
     bne strcpy_loop
 
@@ -23,41 +23,41 @@ memset_fn
     ldy #0
 
 memset_loop
-    +beqw memset_end, regw1
+    +beqw memset_end, reg1
     lda reg0
-    sta (regw0),y
-    +decw regw1
-    +incw regw0
+    sta (reg0),y
+    +decw reg1
+    +incw reg0
     jmp memset_loop
 
 memset_end
     rts
 
-memcpy_fn ; (regw0: dest, regw1: source, regw2, length)
-    lda regw2+1
+memcpy_fn ; (reg0: dest, reg1: source, reg2, length)
+    lda reg2+1
     beq memcpy_bytes
 
 memcpy_pages
     ldy #0
 
 memcpy_page_loop
-    lda (regw1),Y
-    sta (regw0),y
+    lda (reg1),Y
+    sta (reg0),y
     dey
     bne memcpy_page_loop
-    +incw regw0+1
-    +incw regw1+1
-    dec regw2+1
+    +incw reg0+1
+    +incw reg1+1
+    dec reg2+1
     jmp memcpy_fn
 
 memcpy_bytes
-    ldy regw2
+    ldy reg2
     beq memcpy_end
 
 memcpy_bytes_loop
     dey
-    lda (regw1),Y
-    sta (regw0),y
+    lda (reg1),Y
+    sta (reg0),y
     cpy #0
     bne memcpy_bytes_loop
 
@@ -89,30 +89,20 @@ system_disable_kernal_and_basic
 
     +system_disable_interrupts
 
-    +poke $dc0d, $7f
+    +poke $dc0d, $7f            ; disable timer interrupts
     +poke $dd0d, $7f
 
-    lda $dc0d
+    lda $dc0d                   ; clear pending interrupts
     lda $dd0d
 
-    +poke $d01a, $0
-    +poke $d019, $0
+    +poke $d01a, $0             ; clear interrupt mask bits
+    +poke $d019, $0             ; clear interrupt request bits
 
-    +system_mem_map $5
+    +system_mem_map $5          ; disable kernel and basic rom
 
     +system_enable_interrupts
 
     rts
-
-
-std_copy_charset
-    +system_disable_interrupts
-
-    lda $01
-
-    +system_enable_interrupts
-    rts
-
 
 ; -------------------------------------------------
 ; Video
@@ -236,55 +226,111 @@ video_wait_next_frame
     rts
 
 ; -------------------------------------------------
-; Sprites
+; Raster Interrupts
 ; -------------------------------------------------
 
-sprite_init
-    +memcpy video_vic_base, sprites, sprites_end - sprites
+raster_irq_init
+
+    +system_disable_interrupts
+
+    pha        ; push A to stack
+
+    lda #$01   ; turn on raster irq
+    sta $d01a
+
+    lda #$ff   ; set irq raster line to 255
+    sta $d012
+
+    lda $d011
+    and #$7f   ; clear irq raster line 9th bit
+    sta $d011
+
+    lda #<raster_irq_handler  ; setup handler
+    sta $fffe
+    lda #>raster_irq_handler
+    sta $ffff
+
+    pla         ; pull A from stack
+
+    +system_enable_interrupts
+
     rts
 
-sprite_set_pos_fn ; (reg0: sprite, regw0: x, regw1: y)
+; -------------------------------------------------
+; Time measurement
+; Calculates elapsed raster lines
+; -------------------------------------------------
 
-    +storew regw2, $d000              ; x-register
+last_raster_line !word 0                        ; last raster line 0..312
+current_raster_line !word 0                     ; current raster line 0..312
+elapsed_raster_lines !word 0                    ; raster lines 0..312
+elapsed_ticks !byte 0                           ; raster lines 0..255 (clamped)
 
-    +addbv regw2, reg0                ; add (sprite-id*2) bytes as offset to x-register
-    +addbv regw2, reg0
+get_elapsed_ticks
 
-    +movew regw3, regw2               ; y-register
-    +incw regw3
+    pha                                         ; push a
 
-    ldy #0
-    lda regw0,y                       ; store x
-    sta (regw2),y
+    ;;;;;;;;;;;;;;;;;;;;;;;
 
-    lda regw0+1,y
-    sta reg3                          ; store high-byte from x
+    ; set test data for last pos
+    ;lda #$0                                     ; hi
+    ;sta last_raster_line+1
+    ;lda #0                                     ; lo
+    ;sta last_raster_line
 
-    ldy #0
-    lda regw1,y                       ; store y
-    sta (regw3),y
+    ; set test data raster pos
+    ;lda #%10000000                              ; hi
+    ;sta $d011
+    ;lda #56                                    ; lo
+    ;sta $d012
 
-    ldx reg0                            ; create bit mask from sprite id
-    lda #1
-    cpx #0
--   beq +
-    asl
-    dex
-    jmp -
+    ;;;;;;;;;;;;;;;;;;;;;;;
+
+    ; current > last
+    lda current_raster_line
+    sta last_raster_line
+    lda current_raster_line+1
+    sta last_raster_line+1
+
+    ; read current raster pos
+    clc
+    lda $d011                                   ; hi
+    and #$80                                    ; keep bit 7
+    rol                                         ; bit 7 > carry > bit 0
+    rol
+    sta current_raster_line+1
+    lda $d012                                   ; lo
+    sta current_raster_line
+
+    ; calculate difference
+    sec                                         ; set carry
+    lda current_raster_line                     ; lo byte
+    sbc last_raster_line                        ; sub
+    sta elapsed_raster_lines                    ; store
+    lda current_raster_line+1                   ; hi byte
+    sbc last_raster_line+1                      ; sub
+    sta elapsed_raster_lines+1                  ; store
+
+    bpl +                                       ; 312-delta if negative
+    clc
+    lda elapsed_raster_lines                    ; lo
+    adc #56
+    sta elapsed_raster_lines
+    lda elapsed_raster_lines+1                  ; hi
+    adc #1
+    sta elapsed_raster_lines+1
 +
-    sta reg1                            ; store (1<<sprite)
-    eor #$ff
-    sta reg2                            ; store ~(1<<sprite)
 
-    lda $d010                           ; clear bit
-    and reg2
-
-    ldx reg3
-    cpx #0                              ; if (x < 256 - high-byte is zero)
+    lda elapsed_raster_lines+1                  ; hi
+    cmp #0
     beq +
-    ora reg1
+    lda #$ff
+    jmp ++
 +
+    lda elapsed_raster_lines                    ; lo
+++
+    sta elapsed_ticks                           ; 0..255
 
-    sta $d010
+    pla                                         ; pull a
 
     rts

@@ -2,11 +2,16 @@
     "name": "example",
     "description": "Example project",
     "toolkit": "acme",
+    "build": "release",
     "sources": [
         "src/main.asm",
-        "../../resources/sprites.spd"
+        "../../resources/sprites.spd",
+        "../../resources/sample.wav"
     ],
-    "build": "release",
+    "resources": {
+        "sampleFrequency": 4000,
+        "sampleBits": 8
+    },
     "definitions": [],
     "includes": ["lib64/include"]
 }

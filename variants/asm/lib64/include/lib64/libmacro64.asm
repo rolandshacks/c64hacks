@@ -50,25 +50,21 @@
 ; -------------------------------------------------
 
 ; General purpose (always available)
-!addr reg0 = $fb
-!addr reg1 = $fc
-!addr reg2 = $fd
-!addr reg3 = $fe
+!addr reg0 = $fb ; $fb+fc
+!addr reg1 = $fd ; $fd+fe
 
 ; General purpose (just if no RS232)
-!addr reg4 = $f7
-!addr reg5 = $f8
-!addr reg6 = $f9
-!addr reg7 = $fa
+!addr reg2 = $f7 ; $f7+f8
+!addr reg3 = $f9 ; $f9+fa
 
 ; General purpose (just if no BASIC used)
-!addr regw0 = $62 ; $62+63
-!addr regw1 = $64 ; $64+65
-!addr regw2 = $66 ; $66+67
-!addr regw3 = $68 ; $68+69
+!addr reg4 = $62 ; $62+63
+!addr reg5 = $64 ; $64+65
+!addr reg6 = $66 ; $66+67
+!addr reg7 = $68 ; $68+69
 
 ; Used for math operations (just if no BASIC used)
-!addr regl0 = $6a ; $6a+6b+6c+6d
+; !addr regl0 = $6a ; $6a+6b+6c+6d
 
 ; -------------------------------------------------
 ; Data Handling
@@ -80,8 +76,8 @@
 }
 
 !macro storebi .addr, .value {
-    +storew regw0, .addr
-    +storebi regw0, .value
+    +storew 0, .addr
+    +storebi reg0, .value
 }
 
 !macro storebv .addr, .value {
@@ -103,8 +99,8 @@
 }
 
 !macro storewi .addr, .value {
-    +storew regw0,.addr
-    +storew regw0,.value
+    +storew reg0,.addr
+    +storew reg0,.value
 }
 
 !macro moveb .dest, .src {
@@ -178,7 +174,6 @@
     sta .addr+1
 }
 
-
 !macro addwb .addr,.value {
     clc
     lda .addr
@@ -200,9 +195,9 @@
 }
 
 !macro addwvi .addr,.value {
-    +storew regw0, .addr
-    +storew regw1, .value
-    +addwv regw0,regw1
+    +storew reg0, .addr
+    +storew reg1, .value
+    +addwv reg0,reg1
 }
 
 !macro addwbv .addr,.value {
@@ -284,8 +279,8 @@
 }
 
 !macro cmpwi .addr, .val {
-    +storew regw0, .addr
-    +cmpw regw0, .val
+    +storew reg0, .addr
+    +cmpw reg0, .val
 +
 }
 
@@ -315,22 +310,22 @@
 ; -------------------------------------------------
 
 !macro strcpy .dst, .src {
-    +storew regw0, .src
-    +storew regw1, .dst
+    +storew reg0, .src
+    +storew reg1, .dst
     jsr strcpy_fn
 }
 
 !macro memset .dst,.val,.len {
-    +storew regw0, .dst
-    +storeb reg0, .val
-    +storew regw1, .len
+    +storew reg0, .dst
+    +storeb reg2, .val
+    +storew reg1, .len
     jsr memset_fn
 }
 
 !macro memcpy .dst,.src,.len {
-    +storew regw0, .dst
-    +storew regw1, .src
-    +storew regw2, .len
+    +storew reg0, .dst
+    +storew reg1, .src
+    +storew reg2, .len
     jsr memcpy_fn
 }
 
@@ -350,6 +345,7 @@
     lda $01
     and #$f8
     ora #.flags
+    sta $01
 }
 
 ; -------------------------------------------------
@@ -390,9 +386,9 @@
 
 !macro sprite_set_data .sprite,.block {
     lda .block
-    +storew regw0, video_screen_base + $03f8
-    +addwbv regw0, .sprite
-    +storeibv regw0, .block
+    +storew reg0, video_screen_base + $03f8
+    +addwbv reg0, .sprite
+    +storeibv reg0, .block
 }
 
 !macro sprite_set_color .sprite,.color {
@@ -406,8 +402,8 @@
 
 !macro sprite_set_pos .sprite,.x,.y {
     +moveb reg0, .sprite
-    +movew regw0, .x
-    +movew regw1, .y
+    +movew reg1, .x
+    +movew reg2, .y
     jsr sprite_set_pos_fn
 }
 

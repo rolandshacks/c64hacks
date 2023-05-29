@@ -5,6 +5,7 @@
 #include "libcpp64/audio.h"
 
 extern const uint8_t music[];
+extern const size_t music_size;
 extern "C" void init_audio(void);
 extern "C" void update_audio(void);
 
@@ -31,7 +32,7 @@ void Audio::init() {
     const void* srcAddress = (const void*) music;
     void* loadAddress = (void*) 0x5000;
     if (loadAddress != srcAddress) {
-        memcpy(loadAddress, srcAddress, 2460);
+        memcpy(loadAddress, srcAddress, music_size);
     }
 
     init_audio();
