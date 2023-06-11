@@ -98,11 +98,6 @@
     sta .addr+1
 }
 
-!macro storewi .addr, .value {
-    +storew reg0,.addr
-    +storew reg0,.value
-}
-
 !macro moveb .dest, .src {
     lda .src
     sta .dest
@@ -194,12 +189,6 @@
     sta .addr+1
 }
 
-!macro addwvi .addr,.value {
-    +storew reg0, .addr
-    +storew reg1, .value
-    +addwv reg0,reg1
-}
-
 !macro addwbv .addr,.value {
     clc
     lda .addr
@@ -250,17 +239,17 @@
     sta .addr+1
 }
 
-!macro addbv .addr,.value {
+!macro addbv .addr,.addr2 {
     clc
     lda .addr
-    adc .value
+    adc .addr2
     sta .addr
 }
 
-!macro subbv .a,.b {
+!macro subbv .addr,.addr2 {
     sec
     lda .addr
-    sbc .value
+    sbc .addr2
     sta .addr
 }
 
@@ -297,10 +286,10 @@
 
 !macro set_bit .addr,.bitnum,.bitvalue {
     lda .addr
-    !if .bitvalue {
-        ora 1 << .bitnum
+    !if (.bitvalue=1) {
+        ora #(1 << .bitnum)
     } else {
-        and $ff - (1 << .bitnum)
+        and #($ff - (1 << .bitnum))
     }
     sta .addr
 }
@@ -385,10 +374,24 @@
 }
 
 !macro sprite_set_data .sprite,.block {
+
+    lda #>(video_screen_base + $03f8)                                 ; do not go beyond
+    sta reg0 + 1
+    lda #<(video_screen_base + $03f8)
+    sta reg0
+
+    clc
+    lda reg0
+    adc #.sprite
+    sta reg0
+    lda reg0+1
+    adc #0
+    sta reg0+1
+
     lda .block
-    +storew reg0, video_screen_base + $03f8
-    +addwbv reg0, .sprite
-    +storeibv reg0, .block
+    ldy #0
+    sta (reg0),y
+
 }
 
 !macro sprite_set_color .sprite,.color {
@@ -401,7 +404,7 @@
 }
 
 !macro sprite_set_pos .sprite,.x,.y {
-    +moveb reg0, .sprite
+    +storeb reg0, .sprite
     +movew reg1, .x
     +movew reg2, .y
     jsr sprite_set_pos_fn
@@ -423,11 +426,9 @@
                             ; len = 15
 }
 
-!set sprite_info_size = 15
-
 !macro sprite_table .num_sprites {
-    !for id, 0, .num_sprites {
-        +sprite_define id, 80+(id*33), 0+(id*25), $300 + id*20, id*41, 2
+    !for id, 0, .num_sprites-1 {
+        +sprite_define id, 24 + ((id*169)%298), 0+(id*25), $200 + id*50, id*41, 2
     }
 }
 

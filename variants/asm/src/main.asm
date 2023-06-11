@@ -26,13 +26,13 @@
 !macro debug_border_set .value {
     !if (DEBUG = 1) {
         lda #.value
-        sta audio_debug_background_color
+        sta debug_background_color
     }
 }
 
 !macro debug_border_on {
     !if (DEBUG = 1) {
-        lda audio_debug_background_color
+        lda debug_background_color
         sta $d020
     }
 }
@@ -43,6 +43,8 @@
         sta $d020
     }
 }
+
+debug_background_color       !byte 0
 
 ; -------------------------------------------------
 ; application data
@@ -83,11 +85,11 @@ init
     lda #6
     jsr video_set_border                        ; set border color
 
-    !for id, 0, sprite_count-1 {                  ; initialize sprites
+    +sprite_set_common_colors 1, 11
+    !for id, 0, sprite_count-1 {                ; initialize sprites
         +sprite_set_enabled id, 1
         +sprite_set_mode id, 1
         +sprite_set_color id, .sprite_colors + id
-        +sprite_set_common_colors 1, 11
     }
 
     jsr raster_irq_init                         ; enable raster interrupts
@@ -102,22 +104,10 @@ init_end
 raster_vblank_counter   !byte 0
 raster_irq_handler
     pha                                         ; push a,x,y to stack
-    txa
-    pha
-    tya
-    pha
-
     lda #$ff                                    ; reset irq flag
     sta $d019
-
     inc raster_vblank_counter
-
     pla                                         ; pull a,x,y from stack
-    tay
-    pla
-    tax
-    pla
-
     rti
 
 ; -------------------------------------------------
@@ -141,7 +131,10 @@ run_loop
     lda #audio_update_batch_1
     sta audio_update_max_count
 
+    +debug_border_on
     jsr sprites_update                          ; update sprites
+    +debug_border_off
+
     lda system_emulator_flag                    ; if not in cpu emulator
     bne run_loop
 
@@ -181,6 +174,6 @@ main                                            ; main entry
 ; libraries
 ; -------------------------------------------------
 
-!src "src/sprites.asm"
+!src "src/sprite.asm"
 !src "src/audio.asm"
 !src "lib64/libstd64.asm"

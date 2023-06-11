@@ -23,7 +23,6 @@ audio_ofs                    !word 0
 audio_high_nibble            !byte 0
 audio_update_count           !byte 0
 audio_update_max_count       !byte 0
-audio_debug_background_color !byte 0
 
 ; -------------------------------------------------
 ; audio init

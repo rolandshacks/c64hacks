@@ -2,7 +2,7 @@
     "name": "example",
     "description": "Example project",
     "toolkit": "acme",
-    "build": "release",
+    "build": "debug",
     "sources": [
         "src/main.asm",
         "../../resources/sprites.spd",
