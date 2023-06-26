@@ -10,12 +10,12 @@
 ; audio data structures
 ; -------------------------------------------------
 
+!set audio_sample_rate = 8000
+
 !set audio_data = sample
 !set audio_data_end = sample_end
 !set audio_size = audio_data_end - audio_data
-!set audio_update_queue_inc  = 80                       ; 50Hz, 4000kHz, 8 bits/sample, 80 samples/frame
-!set audio_update_batch_1    = 4                        ; samples per update
-!set audio_update_batch_2    = 1                        ; samples per update
+!set audio_timer_delay = 1000000 / audio_sample_rate
 
 audio_sid_type               !byte SID_TYPE_UNKNOWN     ; 0=unknown, 1=6581, 2=8580
 audio_update_queue           !byte 0
@@ -23,6 +23,9 @@ audio_ofs                    !word 0
 audio_high_nibble            !byte 0
 audio_update_count           !byte 0
 audio_update_max_count       !byte 0
+
+!addr audio_reg0 = _reserved_reg6 ; reserve zero-page registers
+!addr audio_reg1 = _reserved_reg7
 
 ; -------------------------------------------------
 ; audio init
@@ -71,123 +74,69 @@ audio_init_detect_sid_wait
 ++
     +system_enable_interrupts
 
-    ldx #$19                    ; write zero to all SID registers
+    ldx #$19                                    ; write zero to all SID registers
     lda #0
 audio_init_loop
     sta $d400,X
     dex
     bne audio_init_loop
 
-    lda #$0f                    ; attack=0, decay=15
+    lda #$0f                                    ; attack=0, decay=15
     sta $d405
     sta $d40c
     sta $d413
 
-    lda #$ff                    ; sustain=15, release=15
+    lda #$ff                                    ; sustain=15, release=15
     sta $d406
     sta $d40d
     sta $d414
 
-    lda #$49                    ; waveform=square, testbit set
+    lda #%01001001                              ; waveform=pulse, testbit set, gate set
     sta $d404
     sta $d40b
     sta $d412
 
-    lda #$ff                    ; cutoff as high as possible
+    lda #$ff                                    ; cutoff as high as possible
     sta $d415
     sta $d416
 
-    lda #$03                    ; enable voice 1 and 2 through filter
+    lda #$03                                    ; enable voice 1 and 2 through filter
     sta $d417
 
-    rts
+    +storew audio_reg0, audio_data              ; sample data start
+    +storew audio_reg1, audio_data_end          ; sample data end
 
-; -------------------------------------------------
-; audio update queue
-; -------------------------------------------------
-
-audio_fill_queue
-
-    !if (AUDIO != 1) { rts }
-
-    clc                                         ; increase update counter
-    lda audio_update_queue
-    cmp #$80
-    bcs +
-    adc #audio_update_queue_inc
-    sta audio_update_queue
-+
     rts
 
 ; -------------------------------------------------
 ; audio playback
 ; -------------------------------------------------
 
-audio_update                                    ; audio update
+nmi_audio_update
 
-    !if (AUDIO != 1) { rts }
+    bit $dd0d                                   ; reset and re-activate cia timer
 
-    pha                                         ; push a to stack
-
-    lda audio_update_queue
-    bne +
-    pla                                         ; no update needed
-    rts                                         ; return
-+
-
-    txa                                         ; push registers to stack
+    pha                                         ; store registers A,X to stack
+    txa
     pha
-    tya
-    pha
-
-audio_update_begin
-
-    ldy audio_update_queue
-    tya
-    cmp audio_update_max_count
-    bcc +
-    ldy audio_update_max_count                  ; limit updates
-+
-
-    +debug_border_on
-
-audio_update_loop
-    +cmpw audio_ofs, audio_size                 ; check audio offset range
-    bne +
-    +storew audio_ofs, 0                        ; loop sample
-+
-
-    clc                                         ; get sample address
-    lda #<audio_data
-    adc audio_ofs
-    sta reg0+0
-
-    lda #>audio_data
-    adc audio_ofs+1
-    sta reg0+1
 
     ldx #0                                      ; read sample byte
-    lda (reg0, X)
-    tax
-
+    lda (audio_reg0, X)                         ; read index for table
+    tax                                         ; store index to X
     lda audio_volume_table, X                   ; get volume from table
     sta $d418                                   ; set master volume
 
-    +incw audio_ofs
+    +incw audio_reg0
+    +cmpw audio_reg0, audio_reg1                ; check audio offset range
+    bne +
+    +storew audio_reg0, audio_data              ; loop sample
++
 
-    dec audio_update_queue                      ; drop from queue
-    dey
-    bne audio_update_loop                       ; next sample
-
-audio_update_end                                ; audio update end
-    +debug_border_off
-
-    pla                                         ; pull registers from stack
-    tay
-    pla
+    pla                                         ; restore registers A,X from stack
     tax
     pla
-    rts
+
+    rti
 
 ; -------------------------------------------------
 ; audio volume tables

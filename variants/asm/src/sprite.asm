@@ -6,12 +6,12 @@
 ; sprite data structures
 ; -------------------------------------------------
 
-.sprite_colors
+sprite_colors
     !byte 2, 6, 2, 11, 2, 4, 2, 9
     ;!byte 1, 2, 3, 4, 5, 6, 7, 8
 
-.sprites
-    +sprite_table sprite_count
+sprite_data
+    +sprite_table SPRITE_COUNT
 
 ; references to sprite info
 sprite_registers
@@ -45,15 +45,14 @@ sprite_init
 
 sprites_update
     ; update sprite data tables
-    !for id, 0, sprite_count-1 {
-        !set sprite = .sprites + id * sprite_registers_size
+    !for id, 0, SPRITE_COUNT-1 {
+        !set sprite = sprite_data + id * sprite_registers_size
 
         !for ofs, 0, sprite_registers_size-1 {
             lda sprite+ofs
             sta sprite_registers+ofs
         }
 
-        jsr audio_update
         jsr sprite_update
 
         !for ofs, 0, sprite_registers_size-1 {
@@ -63,9 +62,13 @@ sprites_update
 
     }
 
+    rts
+
+sprites_flush
+
     ; set all vic sprite registers at once
-    !for id, 0, sprite_count-1 {
-        !set sprite = .sprites + id * sprite_registers_size
+    !for id, 0, SPRITE_COUNT-1 {
+        !set sprite = sprite_data + id * sprite_registers_size
 
         ; set sprite position registers
         +sprite_set_pos id, sprite + sprite_field_x, sprite + sprite_field_y

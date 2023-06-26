@@ -60,8 +60,9 @@
 ; General purpose (just if no BASIC used)
 !addr reg4 = $62 ; $62+63
 !addr reg5 = $64 ; $64+65
-!addr reg6 = $66 ; $66+67
-!addr reg7 = $68 ; $68+69
+
+!addr _reserved_reg6 = $66 ; $66+67
+!addr _reserved_reg7 = $68 ; $68+69
 
 ; Used for math operations (just if no BASIC used)
 ; !addr regl0 = $6a ; $6a+6b+6c+6d
@@ -253,16 +254,30 @@
     sta .addr
 }
 
-!macro cmpw .addr, .val {
-    lda #>(.val)
-    cmp .addr+1
-    bne +
-    lda #<(.val)
+!macro cmpw .addr, .addr2 {
+    lda .addr2
     cmp .addr
+    bne +
+    lda .addr2+1
+    cmp .addr+1
 +
 }
 
-!macro cmpb .addr, .val {
+!macro cmpwv .addr, .val {
+    lda #<(.val)
+    cmp .addr
+    bne +
+    lda #>(.val)
+    cmp .addr+1
++
+}
+
+!macro cmpb .addr, .addr2 {
+    lda .addr2
+    cmp .addr
+}
+
+!macro cmpbv .addr, .val {
     lda .val
     cmp .addr
 }

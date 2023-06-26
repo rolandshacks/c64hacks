@@ -13,11 +13,15 @@
 +std_startup $0801, main
 
 ; -------------------------------------------------
-; application flags
+; application data
 ; -------------------------------------------------
 
 !set DEBUG = 0
 !set AUDIO = 1
+!set SPRITE_COUNT       = 8
+
+debug_background_color  !byte 0
+hellotext               !scr "hello, world!",0 ; zero-terminated string
 
 ; -------------------------------------------------
 ; debug macros
@@ -44,22 +48,12 @@
     }
 }
 
-debug_background_color       !byte 0
-
-; -------------------------------------------------
-; application data
-; -------------------------------------------------
-
-.hellotext !scr "hello, world!",0 ; zero-terminated string
-!set raster_irq_interval = 42
-!set sprite_count = 8
-
 ; -------------------------------------------------
 ; helpers
 ; -------------------------------------------------
 
 print_title
-    +strcpy video_screen_base + 93, .hellotext
+    +strcpy video_screen_base + 93, hellotext
     rts
 
 ; -------------------------------------------------
@@ -72,7 +66,10 @@ init
 
     jsr video_init                              ; init video and charset
     jsr sprite_init                             ; init sprites
-    jsr audio_init                              ; init audio
+
+    !if (AUDIO = 1) {
+        jsr audio_init                          ; init audio
+    }
 
     jsr video_clear                             ; clear screen
 
@@ -86,16 +83,27 @@ init
     jsr video_set_border                        ; set border color
 
     +sprite_set_common_colors 1, 11
-    !for id, 0, sprite_count-1 {                ; initialize sprites
+    !for id, 0, SPRITE_COUNT-1 {                ; initialize sprites
         +sprite_set_enabled id, 1
         +sprite_set_mode id, 1
-        +sprite_set_color id, .sprite_colors + id
+        +sprite_set_color id, sprite_colors + id
     }
 
     jsr raster_irq_init                         ; enable raster interrupts
 
+    !if (AUDIO = 1) {
+        jsr nmi_irq_init                        ; enable nmi interrupts
+    }
+
 init_end
     rts                                         ; init end
+
+
+; -------------------------------------------------
+; nmi interrupt
+; -------------------------------------------------
+
+!set nmi_irq_handler = nmi_audio_update
 
 ; -------------------------------------------------
 ; raster interrupt
@@ -124,12 +132,10 @@ run                                             ; run entrance
     jsr print_title                             ; print title message to screen
 
 run_loop
-    lda #audio_update_queue_inc                 ; re-fill sample queue
-    sta audio_update_queue
 
-    +debug_border_set 1
-    lda #audio_update_batch_1
-    sta audio_update_max_count
+    +debug_border_on
+    jsr sprites_flush                           ; update sprites
+    +debug_border_off
 
     +debug_border_on
     jsr sprites_update                          ; update sprites
@@ -138,19 +144,14 @@ run_loop
     lda system_emulator_flag                    ; if not in cpu emulator
     bne run_loop
 
-    +debug_border_set 2
-    lda #audio_update_batch_2
-    sta audio_update_max_count
-
 run_wait_vblank_loop
-    jsr audio_update                            ; update audio playback
     lda raster_vblank_counter                   ; check if vblank happened
     bne +
     jmp run_wait_vblank_loop                    ; not yet vblank
 +
-
     lda #0                                      ; reset vblank flag
     sta raster_vblank_counter
+
     jmp run_loop                                ; main loop
 
 run_end                                         ; program exit

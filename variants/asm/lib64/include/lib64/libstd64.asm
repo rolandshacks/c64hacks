@@ -226,6 +226,39 @@ video_wait_next_frame
     rts
 
 ; -------------------------------------------------
+; NMI Interrupts
+; -------------------------------------------------
+
+nmi_irq_init
+
+    +system_disable_interrupts
+
+    pha                             ; push A to stack
+
+    lda #<nmi_irq_handler           ; setup handler
+    sta $fffa
+    lda #>nmi_irq_handler
+    sta $fffb
+
+                                    ; setup timer A on CIA #2
+    lda #<audio_timer_delay         ; timer A low byte
+    sta $dd04
+    lda #>audio_timer_delay         ; timer A high byte
+    sta $dd05
+
+    lda #%10000001                  ; enable interrupt
+    sta $dd0d
+
+    lda #%00010001                  ; timer A control
+    sta $dd0e
+
+    pla                             ; pull A from stack
+
+    +system_enable_interrupts
+
+    rts
+
+; -------------------------------------------------
 ; Raster Interrupts
 ; -------------------------------------------------
 
