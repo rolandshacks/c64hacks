@@ -91,7 +91,15 @@ audio_init_loop
     sta $d40d
     sta $d414
 
-    lda #%01001001                              ; waveform=pulse, testbit set, gate set
+    lda audio_sid_type
+    cmp #SID_TYPE_6581
+    bne +
+    lda #%01001001                              ; 6581: waveform=pulse, testbit set, gate set
+    jmp ++
++
+    lda #%00000001                              ; 8580: no waveform, no testbit, gate set
+++
+
     sta $d404
     sta $d40b
     sta $d412
