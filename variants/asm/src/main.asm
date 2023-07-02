@@ -16,8 +16,8 @@
 ; application data
 ; -------------------------------------------------
 
-!set DEBUG = 0
-!set AUDIO = 1
+!set DEBUG              = 0
+!set AUDIO              = 1
 !set SPRITE_COUNT       = 8
 
 debug_background_color  !byte 0
@@ -82,7 +82,8 @@ init
     lda #6
     jsr video_set_border                        ; set border color
 
-    +sprite_set_common_colors 1, 11
+    +sprite_set_common_colors sprite_common_colors, sprite_common_colors+1
+
     !for id, 0, SPRITE_COUNT-1 {                ; initialize sprites
         +sprite_set_enabled id, 1
         +sprite_set_mode id, 1

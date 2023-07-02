@@ -5,7 +5,7 @@
 ![dev: emulator](img/dev.svg)
 ![license: apache](img/license.svg)
 
-Demo for the Commodore C64 written in C++ 20 using Clang for 6502/6510.
+Demos for the Commodore C64 written in C++ 20 using Clang for 6502/6510, C using CC65 and 6502 assembler using ACME.
 
 <table><tr>
   <td style="padding: 20px; padding-right: 40px;"><img src="img/demo.gif" height=136px></td>
@@ -13,23 +13,24 @@ Demo for the Commodore C64 written in C++ 20 using Clang for 6502/6510.
 
 - Animated sprites
 - Scrolling starfield
-- SID music
 - Raster interrupt handling
-- C64 system programming SDK
+- SID music
+- NMI digi sample playback
 
 ## Setup
 
 - For development and building, please install the VS64 extension for Visual Studio Code. (https://marketplace.visualstudio.com/items?itemName=rosc.vs64)
-
 - For best performance, switch the build mode to "release" to turn on code optimization. This makes a significant difference!
-
--  The LLVM-MOS development environment needs to be installed. (https://github.com/llvm-mos/llvm-mos-sdk)
-
-- To compile the additional examples for CC65 and the ACME assembler, the relevant toolkits need to be installed.
-
 - To edit the sprites and charsets, the tools CharPadPro and SpritePadPro need to be installed (Windows only)
+- For C++, the LLVM-MOS development environment needs to be installed. (https://github.com/llvm-mos/llvm-mos-sdk)
+- For plain C, the CC65 compiler needs to be installed. (https://cc65.github.io)
+- For 6502 assembler, the ACME Cross-Assembler needs to be installed. (https://sourceforge.net/projects/acme-crossass)
 
 ## Further Notes
+
+### Additional Toolkits
+
+Not covered yet, but fyi - VS64 also supports the Kick Assembler toolkit. Porting the ACME version of the demo should be very straight forward to do. (http://theweb.dk/KickAssembler)
 
 ### Additional Content
 

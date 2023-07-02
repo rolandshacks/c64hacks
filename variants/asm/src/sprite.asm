@@ -8,7 +8,9 @@
 
 sprite_colors
     !byte 2, 6, 2, 11, 2, 4, 2, 9
-    ;!byte 1, 2, 3, 4, 5, 6, 7, 8
+
+sprite_common_colors
+    !byte sprites_col_multi1, sprites_col_multi2
 
 sprite_data
     +sprite_table SPRITE_COUNT

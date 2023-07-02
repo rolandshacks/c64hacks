@@ -414,8 +414,8 @@
 }
 
 !macro sprite_set_common_colors .color_a,.color_b {
-    +moveb $d026, .color_a
-    +moveb $d025, .color_b
+    +moveb $d025, .color_a
+    +moveb $d026, .color_b
 }
 
 !macro sprite_set_pos .sprite,.x,.y {

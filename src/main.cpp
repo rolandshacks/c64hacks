@@ -58,7 +58,7 @@ namespace SpriteBatch {
 
     static void init() {
 
-        Video::setSpriteCommonColors(1, 11);
+        Video::setSpriteCommonColors(sprites_col_multi1, sprites_col_multi2);
 
         uint8_t sprite_colors[] = {2,6,2,11,2,4,2,9};
 

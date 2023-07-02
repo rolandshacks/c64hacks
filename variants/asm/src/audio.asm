@@ -10,12 +10,12 @@
 ; audio data structures
 ; -------------------------------------------------
 
-!set audio_sample_rate = 8000
+!set audio_sample_rate = sample_sample_rate
 
 !set audio_data = sample
 !set audio_data_end = sample_end
 !set audio_size = audio_data_end - audio_data
-!set audio_timer_delay = 1000000 / audio_sample_rate
+!set audio_timer_delay = 1000000 / audio_sample_rate - 10
 
 audio_sid_type               !byte SID_TYPE_UNKNOWN     ; 0=unknown, 1=6581, 2=8580
 audio_update_queue           !byte 0

@@ -137,6 +137,9 @@ typedef struct sprite_tag sprite_t;
 sprite_t sprite_data[sprite_count] = {};
 uint8_t sprite_colors[] = {2,6,2,11,2,4,2,9};
 
+extern const unsigned char sprites_col_multi1;
+extern const unsigned char sprites_col_multi2;
+
 void sprite_update_pos(sprite_t* sprite) {
     uint16_t sx = (sprite->x > 0) ? sprite->x : 0;
     uint16_t sy = (sprite->y > 0) ? sprite->y : 0;
@@ -150,7 +153,7 @@ void sprites_init() {
     sprite_t* sprite;
     uint8_t col;
 
-    sprite_set_common_colors(1, 11);
+    sprite_set_common_colors(sprites_col_multi1, sprites_col_multi2);
 
     for (i=0; i<sprite_count; i++) {
         sprite = &sprite_data[i];

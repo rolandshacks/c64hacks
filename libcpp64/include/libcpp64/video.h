@@ -7,6 +7,10 @@
 
 extern const size_t sprites_size;
 extern const uint8_t sprites[];
+extern const unsigned char sprites_col_background;
+extern const unsigned char sprites_col_multi1;
+extern const unsigned char sprites_col_multi2;
+extern const unsigned char sprites_sprite_count;
 
 namespace sys {
 

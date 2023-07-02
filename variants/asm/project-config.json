@@ -9,7 +9,7 @@
         "../../resources/sample.wav"
     ],
     "resources": {
-        "sampleFrequency": 8000,
+        "sampleFrequency": 6000,
         "sampleBits": 8
     },
     "definitions": [],
