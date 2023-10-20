@@ -6,11 +6,13 @@
     "sources": [
         "src/main.asm",
         "../../resources/sprites.spd",
-        "../../resources/sample.wav"
+        "../../resources/sample.wav",
+        "../../resources/bitmap.png"
     ],
     "resources": {
         "sampleFrequency": 6000,
-        "sampleBits": 8
+        "sampleBits": 8,
+        "bitmapDithering": true
     },
     "definitions": [],
     "includes": ["lib64/include"]

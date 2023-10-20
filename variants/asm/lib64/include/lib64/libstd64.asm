@@ -24,7 +24,7 @@ memset_fn
 
 memset_loop
     +beqw memset_end, reg1
-    lda reg0
+    lda reg2
     sta (reg0),y
     +decw reg1
     +incw reg0
@@ -110,31 +110,72 @@ system_disable_kernal_and_basic
 
 video_init
 
-    lda %00000011                   ; enable CIA port A write
+    +system_disable_interrupts
+
+    lda #%00000011                   ; enable CIA port A write
     sta $dd02
 
     lda $dd00                       ; set VIC base
-    and $fc
-    ora # (3 - video_vic_bank & 3)
+    and #%11111100
+    ora # (3 - (video_vic_bank & 3))
     sta $dd00
 
-    lda $d016                       ; set text mode
-    and #$ef
-    sta $d016
+    lda $dd00
+    and #%00000011
+
+    ;jsr video_set_text_mode
+    ;jsr video_copy_charset
+
+    jsr video_set_multicolor_bitmap_mode
+
+    +system_enable_interrupts
+
+    rts
+
+video_enable
     lda $d011
-    and #$9f
+    ora #$10
+    sta $d011
+    rts
+
+video_disable
+    lda $d011
+    and #$ef
+    sta $d011
+    rts
+
+video_set_text_mode
+
+    lda $d011                       ; set text mode
+    and #$9f                        ; clear bit 5 (BMM) and bit 6 (ECM)
     sta $d011
 
-    lda $d018                       ; set screen base
-    and #$0f
-    ora # ((video_screen_bank & $f) << 4)
-    sta $d018
-
-    jsr video_copy_charset
+    lda $d016
+    and #$ef                        ; clear bit 4 (MCM)
+    sta $d016
 
     lda $d018                       ; set charset base
     and #$f1
     ora # ((video_charset_bank & $f) << 1)
+    sta $d018
+
+    rts
+
+video_set_multicolor_bitmap_mode
+
+    lda $d011                       ; set text mode
+    ora #$20                        ; set bit 5 (BMM)
+    and #$bf                        ; clear bit 6 (ECM)
+    sta $d011
+
+    lda $d016
+    ora #$10                        ; set bit 4 (MCM)
+    sta $d016
+
+    lda $d018
+    and #$07                        ; clear upper 5 bits
+    ora # ((video_screen_bank & $f) << 4) ; set screen base
+    ora # (video_bitmap_bank << 3)  ; set bitmap base
     sta $d018
 
     rts

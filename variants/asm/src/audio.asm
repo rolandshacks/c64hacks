@@ -130,8 +130,10 @@ nmi_audio_update
 
     ldx #0                                      ; read sample byte
     lda (audio_reg0, X)                         ; read index for table
+
     tax                                         ; store index to X
     lda audio_volume_table, X                   ; get volume from table
+
     sta $d418                                   ; set master volume
 
     +incw audio_reg0

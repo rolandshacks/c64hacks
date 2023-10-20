@@ -356,21 +356,22 @@
 ; Video
 ; -------------------------------------------------
 
-!set video_vic_bank = 2
+!set video_vic_bank = 3 ; ($C000-$FFFF)
 !set video_screen_bank = 1
 !set video_charset_bank = 1
-!addr video_vic_base = video_vic_bank * $4000 ; ($8000)
-!addr video_screen_base = video_vic_base + video_screen_bank * $400 ; ($8400)
-!addr video_bitmap_base = video_vic_base + $2000 ; ($A000)
+!set video_bitmap_bank = 1
+!addr video_vic_base = video_vic_bank * $4000 ; ($C000)
+!addr video_screen_base = video_vic_base + video_screen_bank * $400 ; ($C400)
+!addr video_bitmap_base = video_vic_base + video_bitmap_bank * $2000 ; ($E000)
 !addr video_color_base = $d800
-!addr video_charset_base = video_vic_base + video_charset_bank * $800 ; ($8800)
-!addr video_charset_base_origin = $d000
+!addr video_charset_base = video_vic_base + video_charset_bank * $800 ; ($C800)
+!addr video_charset_base_origin = $d000 ; (ROM address)
 
 ; -------------------------------------------------
 ; Sprites
 ; -------------------------------------------------
 
-!addr sprite_base = video_vic_base ; ($8000)
+!addr sprite_base = video_vic_base
 !set sprite_base_index = 0
 
 !addr sprw0 = $6a ; $6a+6b

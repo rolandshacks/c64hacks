@@ -1,6 +1,8 @@
 ;
 ; C64 Demo
 ;
+; Multi-color bitmap mode
+; VIC configured to bank 3 ($c000..$ffff)
 ; 8 animated sprites
 ;
 ; Sample playback:  4kHz, 8 bit
@@ -49,7 +51,7 @@ hellotext               !scr "hello, world!",0 ; zero-terminated string
 }
 
 ; -------------------------------------------------
-; helpers
+; show text on screen
 ; -------------------------------------------------
 
 print_title
@@ -57,10 +59,27 @@ print_title
     rts
 
 ; -------------------------------------------------
+; show bitmap on screen
+; -------------------------------------------------
+
+show_bitmap
+    +system_disable_interrupts
+
+    +memcpy video_color_base, bitmap_colors, bitmap_colors_end - bitmap_colors
+    +memcpy video_screen_base, bitmap_screen, bitmap_screen_end - bitmap_screen
+    +memcpy video_bitmap_base, bitmap_pixels, bitmap_pixels_end - bitmap_pixels
+
+    +system_enable_interrupts
+
+    rts
+
+; -------------------------------------------------
 ; init
 ; -------------------------------------------------
 
 init
+    jsr video_disable
+
     jsr system_init                             ; initialize system
     jsr system_disable_kernal_and_basic         ; disable kernal and basic to get RAM
 
@@ -71,10 +90,7 @@ init
         jsr audio_init                          ; init audio
     }
 
-    jsr video_clear                             ; clear screen
-
-    lda #1
-    jsr video_set_colors                        ; set color ram
+    jsr show_bitmap                             ; copy bitmap data to screen
 
     lda #0
     jsr video_set_background                    ; set background color
@@ -96,9 +112,10 @@ init
         jsr nmi_irq_init                        ; enable nmi interrupts
     }
 
+    jsr video_enable
+
 init_end
     rts                                         ; init end
-
 
 ; -------------------------------------------------
 ; nmi interrupt
@@ -111,6 +128,7 @@ init_end
 ; -------------------------------------------------
 
 raster_vblank_counter   !byte 0
+
 raster_irq_handler
     pha                                         ; push a,x,y to stack
     lda #$ff                                    ; reset irq flag
@@ -130,7 +148,7 @@ run                                             ; run entrance
     tya
     pha
 
-    jsr print_title                             ; print title message to screen
+    ;jsr print_title                             ; print title message to screen
 
 run_loop
 
