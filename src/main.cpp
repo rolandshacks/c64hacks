@@ -53,7 +53,7 @@ struct Sprite {
 
 namespace SpriteBatch {
 
-    const size_t sprite_count = 8;
+    const uint8_t sprite_count = 8;
     Sprite sprites[sprite_count];
 
     static void init() {
@@ -63,8 +63,10 @@ namespace SpriteBatch {
         uint8_t sprite_colors[] = {2,6,2,11,2,4,2,9};
 
         uint8_t block_index = Video::getSpriteAddress();
-        uint8_t i = 0;
-        for (auto& sprite : sprites) {
+
+        for (auto i = 0; i < sprite_count; i++) {
+            auto& sprite = sprites[i];
+
             sprite.id = i;
 
             auto col = sprite_colors[i];
@@ -81,14 +83,14 @@ namespace SpriteBatch {
 
             sprite.updatePos();
             sprite.updateAnimation();
-
-            i++;
         }
+
     }
 
     static void update() {
 
-        for (auto& sprite : sprites) {
+        for (auto i = 0; i < sprite_count; i++) {
+            auto& sprite = sprites[i];
 
             if (sprite.animation_counter >= sprite.animation_delay) {
                 sprite.animation_counter -= sprite.animation_delay;
@@ -109,6 +111,7 @@ namespace SpriteBatch {
             } else {
                 sprite.animation_counter++;
             }
+
 
             if (sprite.xdir == 0) {
                 sprite.x += sprite.vx;
@@ -136,20 +139,18 @@ namespace SpriteBatch {
             sprite.updatePos();
             sprite.updateAnimation();
         }
+
     }
 
 } // namespace
 
 namespace Starfield {
 
-    struct Star {
-        uint8_t x;
-        uint8_t shift;
-        uint8_t speed;
-    };
+    const size_t num_stars = 10;
+    uint8_t star_x[num_stars];
+    uint8_t star_shift[num_stars];
+    uint8_t star_speed[num_stars];
 
-    const size_t num_stars = 12;
-    Star stars[num_stars] = {};
     const uint8_t star_char_base = (charset_size / 8); // use chars after custom charset
     const uint8_t star_color[] = { 0xf, 0xc, 0x1 };
     const uint8_t stars_y = 3;
@@ -168,9 +169,9 @@ namespace Starfield {
 
         // init stars
         for (int i=0; i<num_stars; i++) {
-            stars[i].x = sys::rand() % 104; // 40+64
-            stars[i].shift = 0;
-            stars[i].speed = 1 + (i%3);
+            star_x[i] = sys::rand() % 104; // 40+64
+            star_shift[i] = 0;
+            star_speed[i] = 1 + (i%3);
         }
 
         // init color buffer
@@ -188,32 +189,31 @@ namespace Starfield {
         static uint8_t y;
         y = stars_y;
 
-        for (auto& star : stars) {
-            if (y >= stars_yend) break;
+        for (int i=0; i<num_stars; i++) {
 
-            if (star.x >= 40) {
-                star.x--;
+            if (star_x[i] >= 40) {
+                star_x[i]--;
                 y += step_size;
                 continue;
             }
 
-            star.shift += star.speed;
-            if (star.shift >= 8) {
-                star.shift -= 8;
-                Video::putc(star.x, y, star_char_base);
-                if (star.x == 0) {
-                    star.x = 40 + (sys::rand()>>2);
+            star_shift[i] += star_speed[i];
+            if (star_shift[i] >= 8) {
+                star_shift[i] -= 8;
+                Video::putc(star_x[i], y, star_char_base);
+                if (star_x[i] == 0) {
+                    star_x[i] = 40 + (sys::rand()>>2);
                     y += step_size;
                     continue;
                 } else {
-                    star.x--;
+                    star_x[i]--;
                 }
             }
 
-            Video::putc(star.x, y, star_char_base + 1 + star.shift);
+            Video::putc(star_x[i], y, star_char_base + 1 + star_shift[i]);
             y += step_size;
-
         }
+
     }
 
 } // namespace
@@ -252,20 +252,20 @@ class Application {
             if (enable_irq) {
                 auto metrics = Video::metrics();
                 Video::enableRasterIrqDebug(enable_raster_debug);
-                Video::addRasterSequenceStep(55, onSwitchOnHighRes);
-                Video::addRasterSequenceStep(metrics.num_raster_lines - 100, onSwitchOnMultiColor);
-                Video::addRasterSequenceStep(metrics.num_raster_lines - 60, onVerticalBlank);
+                Video::addRasterSequenceStep(60, onSwitchOnHighRes);
+                Video::addRasterSequenceStep(140, onVerticalBlank);
+                Video::addRasterSequenceStep(208, onSwitchOnMultiColor);
                 Video::enableRasterSequence();
             }
 
         }
 
-        static void onSwitchOnMultiColor() {
-            Video::setGraphicsMode(GraphicsMode::MulticolorTextMode);
-        }
-
         static void onSwitchOnHighRes() {
             Video::setGraphicsMode(GraphicsMode::StandardTextMode);
+        }
+
+        static void onSwitchOnMultiColor() {
+            Video::setGraphicsMode(GraphicsMode::MulticolorTextMode);
         }
 
         static void onVerticalBlank() {
