@@ -218,13 +218,15 @@ namespace Starfield {
 
 } // namespace
 
+extern "C" void on_raster_irq_0(void);
+
 class Application {
     private:
         static const bool enable_irq = true;
         static const bool enable_audio = true;
         static const bool enable_sprites = true;
         static const bool enable_starfield = true;
-        static const bool enable_raster_debug = false;
+        static const bool enable_raster_asm = false;
 
     private:
         static void init() {
@@ -242,7 +244,7 @@ class Application {
 
             if (enable_starfield) Starfield::init();
 
-            Video::clear(0x0); //Starfield::star_char_base);
+            Video::clear(0x0);
             Video::setBackground(0);
             Video::setBorder(0);
 
@@ -251,11 +253,17 @@ class Application {
 
             if (enable_irq) {
                 auto metrics = Video::metrics();
-                Video::enableRasterIrqDebug(enable_raster_debug);
-                Video::addRasterSequenceStep(60, onSwitchOnHighRes);
-                Video::addRasterSequenceStep(140, onVerticalBlank);
-                Video::addRasterSequenceStep(208, onSwitchOnMultiColor);
-                Video::enableRasterSequence();
+
+                if (!enable_raster_asm) {
+                    // raster sequence implemented in C++
+                    Video::addRasterSequenceStep(60, onSwitchOnHighRes);
+                    Video::addRasterSequenceStep(140, onVerticalBlank);
+                    Video::addRasterSequenceStep(217, onSwitchOnMultiColor);
+                    Video::enableRasterSequence();
+                } else {
+                    // raster sequence implemented in assembly
+                    Video::enableRasterIrq(on_raster_irq_0, 70);
+                }
             }
 
         }

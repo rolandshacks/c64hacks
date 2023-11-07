@@ -9,6 +9,7 @@
         "libcpp64/src/system.cpp",
         "libcpp64/src/video.cpp",
         "src/main.cpp",
+        "src/raster.asm",
         "resources/music.sid",
         "resources/sprites.spd",
         "resources/charset.ctm"

@@ -6,16 +6,20 @@
 
 using namespace sys;
 
+static const bool raster_irq_debug{false};
+static const bool metrics_enabled{false};
+
 Video::metrics_t Video::metrics_{};
 volatile Video::stats_t Video::stats_{};
-volatile uint16_t Video::last_frame_counter_{0xffff};
+volatile uint8_t stats_frame_counter{0};
+volatile uint8_t Video::last_frame_counter_{0xff};
 bool Video::raster_irq_enabled{false};
-Video::raster_step_t Video::raster_sequence[8]{};
 uint16_t Video::row_addresses[25]{};
 uint16_t Video::col_addresses[25]{};
+
+Video::raster_step_t Video::raster_sequence[8]{};
 volatile uint8_t Video::raster_sequence_step{0};
 uint8_t Video::raster_sequence_step_count{0};
-bool Video::raster_irq_debug{false};
 
 uint16_t Video::vic_base    = 0x0;
 uint16_t Video::screen_base = 0x400;
@@ -219,48 +223,49 @@ void Video::addRasterSequenceStep(uint16_t line, interrupt_handler_t fn) noexcep
     }
 }
 
-void Video::enableRasterIrqDebug(bool enable) noexcept {
-    raster_irq_debug = enable;
-}
-
 __attribute__((interrupt_norecurse))
 void Video::onRasterInterrupt() noexcept {
 
-    static uint8_t border;
-
-    if (raster_irq_debug) {
-        border = Video::getBorder();
-        Video::setBorder(border+1);
+    if constexpr (raster_irq_debug) {
+        asm ( "inc $d020\n" );
     }
 
     const auto& entry = raster_sequence[raster_sequence_step];
+    entry.fn();
 
-    if (raster_sequence_step_count < 2) {
-        onVerticalBlank();
-    } else {
-        raster_sequence_step = raster_sequence_step + 1;
-        if (raster_sequence_step >= raster_sequence_step_count) {
-            onVerticalBlank();
-            raster_sequence_step = 0;
+    raster_sequence_step = raster_sequence_step + 1;
+    if (raster_sequence_step >= raster_sequence_step_count) {
+        raster_sequence_step = 0;
+    }
+
+    if (raster_sequence_step == 0) {
+        stats_frame_counter = stats_frame_counter + 1;
+        if constexpr (metrics_enabled) {
+            updateMetrics();
+        }
+    }
+
+    if (raster_sequence_step_count > 1) {
+        const auto& next_entry = raster_sequence[raster_sequence_step];
+        memory(0xd012) = (uint8_t) (next_entry.line & 0x00ff);
+        if (next_entry.line > 255) {
+            memory(0xd011) |= 0x80;
+        } else {
+            memory(0xd011) &= 0x7f;
         }
 
-        const auto& next_entry = raster_sequence[raster_sequence_step];
-        setRasterIrqLine(next_entry.line);
     }
 
-    if (nullptr != entry.fn) {
-        entry.fn();
-    }
-
-    if (raster_irq_debug) {
-        Video::setBorder(border);
+    if constexpr (raster_irq_debug) {
+        asm ( "dec $d020\n" );
     }
 
     memory(0xd019) = 0xff; // ACK irq, clear VIC irq flag
 }
 
-void Video::onVerticalBlank() noexcept {
+void Video::updateMetrics() noexcept {
 
+    stats_.frame_counter = stats_.frame_counter + 1;
     stats_.time_delta = metrics_.millis_per_frame;
 
     if (!metrics_.is_pal) {
@@ -276,15 +281,13 @@ void Video::onVerticalBlank() noexcept {
         stats_.time_seconds = stats_.time_seconds+ 1;
         stats_.time_millis = stats_.time_millis + 1000;
     }
-
-    stats_.frame_counter = stats_.frame_counter + 1;
 }
 
 void Video::waitNextFrame() noexcept {
 
     if (raster_irq_enabled) {
-        while (last_frame_counter_ == stats_.frame_counter) {}
-        last_frame_counter_ = stats_.frame_counter;
+        while (last_frame_counter_ == stats_frame_counter) {}
+        last_frame_counter_ = stats_frame_counter;
         return;
     }
 
@@ -292,7 +295,10 @@ void Video::waitNextFrame() noexcept {
     if (line >= 240) { while (getRasterLine() > 80) {}; }
     while (getRasterLine() < 240) {};
 
-    onVerticalBlank();
+    stats_frame_counter = stats_frame_counter + 1;
+    if constexpr (metrics_enabled) {
+        updateMetrics();
+    }
 }
 
 void Video::waitLines(uint16_t lines) noexcept {

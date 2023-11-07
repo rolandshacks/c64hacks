@@ -8,18 +8,15 @@ volatile uint8_t& sys::memory(const uint16_t address) {
 }
 
 void sys::set_bit(const uint16_t address, uint8_t bit, bool enabled) {
-    static address_t ptr;
-    static uint8_t value;
-
-    ptr = reinterpret_cast<address_t>(address);
-    value = (enabled) ? *ptr | (1 << bit) : *ptr & ~(1 << bit);
-    *ptr = value;
+    if (enabled) {
+        memory(address) |= (1 << bit);
+    } else {
+        memory(address) &= ~(1 << bit);
+    }
 }
 
 [[nodiscard]] bool sys::get_bit(const uint16_t address, uint8_t bit) {
-    static address_t ptr;
-    ptr = reinterpret_cast<address_t>(address);
-    return (*ptr & (1 << bit)) != 0x0;
+    return ((memory(address) & (1 << bit)) != 0x0);
 }
 
 using namespace sys;
